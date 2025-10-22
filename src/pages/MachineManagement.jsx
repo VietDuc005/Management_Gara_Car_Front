@@ -6,7 +6,7 @@ import SortControls from "../components/common/SortControls";
 import Pagination from "../components/common/Pagination";
 import Box from "../components/common/Box";
 import ConfirmModal from "../components/common/ConfirmModal";
-import { customerService } from "../services/customerService";
+import { machineService } from "../services/machineService";
 import { Plus } from "lucide-react";
 
 const getStatusColor = (status) => {
@@ -21,12 +21,12 @@ const getStatusColor = (status) => {
 };
 
 
-const CustomerManagement = () => {
+const MachineManagement = () => {
   const { showToast } = useToast();
-  const [customers, setCustomers] = useState([]);
+  const [machine, setMachine] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [searchField, setSearchField] = useState("tenKhachHang");
+  const [searchField, setSearchField] = useState("ngayVaoLam");
   const [searchTerm, setSearchTerm] = useState("");
   const [pagination, setPagination] = useState({
     page: 0,
@@ -34,7 +34,7 @@ const CustomerManagement = () => {
     totalPages: 1,
   });
   const [sortConfig, setSortConfig] = useState({
-    sortBy: "tenKhachHang",
+    sortBy: "ngayVaoLam",
     sortDirection: "asc",
   });
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
@@ -55,7 +55,7 @@ const CustomerManagement = () => {
 
       if (debouncedSearchTerm) {
         const searchCriteria = { [searchField]: debouncedSearchTerm };
-        responseData = await customerService.search(
+        responseData = await machineService.search(
           searchCriteria,
           page,
           size,
@@ -63,7 +63,7 @@ const CustomerManagement = () => {
           sortDirection
         );
       } else {
-        responseData = await customerService.getAll(
+        responseData = await machineService.getAll(
           page,
           size,
           sortBy,
@@ -72,10 +72,10 @@ const CustomerManagement = () => {
       }
 
       if (responseData && responseData.content) {
-        setCustomers(
+        setMachine(
           responseData.content.map((item) => ({
             ...item,
-            id: item.maKhachHang,
+            id: item.maTho,
           }))
         );
         setPagination((prev) => ({
@@ -83,11 +83,11 @@ const CustomerManagement = () => {
           totalPages: responseData.totalPages || 1,
         }));
       } else {
-        setCustomers([]);
+        setMachine([]);
         setPagination((prev) => ({ ...prev, totalPages: 1, page: 0 }));
       }
     } catch (err) {
-      showToast(err.message || "Không thể tải danh sách khách hàng.", "error");
+      showToast(err.message || "Không thể tải danh sách thợ.", "error");
     } finally {
       setLoading(false);
     }
@@ -132,8 +132,8 @@ const CustomerManagement = () => {
   const confirmDelete = async () => {
     if (!itemToDelete) return;
     try {
-      await customerService.delete(itemToDelete.maKhachHang);
-      showToast("Xóa khách hàng thành công!", "success");
+      await machineService.delete(itemToDelete.maTho);
+      showToast("Xóa thợ thành công!", "success");
       fetchData();
     } catch (err) {
       showToast(err.message, "error");
@@ -146,10 +146,10 @@ const CustomerManagement = () => {
   const handleSave = async (formData) => {
     try {
       if (modalMode === "create") {
-        await customerService.create(formData);
-        showToast("Thêm mới khách hàng thành công!", "success");
+        await machineService.create(formData);
+        showToast("Thêm mới thợ thành công!", "success");
       } else {
-        await customerService.update(editingData.maKhachHang, formData);
+        await machineService.update(editingData.maTho, formData);
         showToast("Cập nhật khách hàng thành công!", "success");
       }
       setIsModalOpen(false);
@@ -159,35 +159,34 @@ const CustomerManagement = () => {
     }
   };
 
-  const customerFormFields = [
+  const machineFormFields = [
     {
-      name: "tenKhachHang",
-      label: "Tên Khách Hàng",
+      name: "tenTho",
+      label: "Tên Thợ",
       type: "text",
       required: true,
       defaultValue: "",
     },
     {
-      name: "soDienThoai",
-      label: "Số Điện Thoại",
+      name: "chuyenMon",
+      label: "Chuyên Môn",
       type: "text",
       required: true,
       defaultValue: "",
     },
+    { name: "soDienThoai", label: "Số Điện Thoại", type: "text",require: true , defaultValue: "" },
     { name: "email", label: "Email", type: "email", defaultValue: "" },
-    { name: "diaChi", label: "Địa Chỉ", type: "text", defaultValue: "" },
     {
-      name: "loaiKhach",
-      label: "Loại Khách",
-      type: "select",
-      options: ["Cá nhân", "Doanh nghiệp"],
-      defaultValue: "Cá nhân",
+      name: "kinhNghiem",
+      label: "Kinh Nghiệm",
+      type: "text",
+      defaultValue: "",
     },
-    { name: "ghiChu", label: "Ghi Chú", type: "textarea", defaultValue: "" },
+    { name: "ngayVaoLam", label: "Ngày Vào Làm", type: "Date", defaultValue: "" },
   ];
 
-  const editCustomerFormFields = [
-    ...customerFormFields,
+  const editMachineFormFields = [
+    ...machineFormFields,
     {
       name: "trangThai",
       label: "Trạng Thái",
@@ -198,23 +197,21 @@ const CustomerManagement = () => {
   ];
 
   const sortOptions = [
-    { value: "tenKhachHang", label: "Sắp xếp theo Tên" },
-    { value: "loaiKhach", label: "Sắp xếp theo Loại Khách Hàng" },
+    { value: "tenTho", label: "Sắp xếp theo Tên" },
+    { value: "chuyenMon", label: "Sắp xếp theo Chuyên Môn" },
   ];
   const searchOptions = [
-    { value: "tenKhachHang", label: "Tìm theo Tên" },
-    { value: "soDienThoai", label: "Tìm theo Số điện thoại" },
-    { value: "email", label: "Tìm theo Email" },
-    { value: "loaiKhach", label: "Tìm theo Loại Khách" },
-    { value: "trangThai", label: "Tìm theo Trạng Thái" },
+    { value: "tenTho", label: "Tìm theo Tên" },
+    { value: "chuyenMon", label: "Tìm theo Chuyên môn" },
+    { value: "trangThai", label: "Tìm theo Trạng thái" },
+    
   ];
   const columns = [
-    { key: "maKhachHang", label: "Mã Khách Hàng" },
-    { key: "tenKhachHang", label: "Tên Khách Hàng" },
+    { key: "maTho", label: "Mã Thợ" },
+    { key: "tenTho", label: "Tên Thợ" },
+    { key: "chuyenMon", label: "Chuyên Môn" },
     { key: "soDienThoai", label: "Số Điện Thoại" },
     { key: "email", label: "Email" },
-    { key: "diaChi", label: "Địa Chỉ" },
-    { key: "loaiKhach", label: "Loại Khách " },
     {
       key: "trangThai",
       label: "Trạng Thái",
@@ -228,14 +225,14 @@ const CustomerManagement = () => {
         </span>
       ),
     },
+    { key: "kinhNghiem", label: "Kinh Nghiệm " },
+    { key: "ngayVaoLam", label: "Ngày Vào Làm " },
   ];
 
   return (
     <div className="space-y-6 transition-colors duration-300">
       <div className="flex items-center justify-between bg-white dark:bg-gray-900 p-6 rounded-xl shadow transition-colors duration-300">
-  <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
-    Quản lý Khách hàng
-  </h2>
+  <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Quản lý Thợ</h2>
 
         <button
           onClick={handleCreateNew}
@@ -244,8 +241,8 @@ const CustomerManagement = () => {
           <Plus size={18} /> Thêm mới
         </button>
       </div>
-      <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md flex flex-col md:flex-row justify-between items-center gap-4 transition-colors duration-300">
-<SearchWithOptions
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md p-4 flex flex-col md:flex-row justify-between items-center gap-4 transition-colors duration-300">
+  <SearchWithOptions
           searchField={searchField}
           searchTerm={searchTerm}
           onSearchFieldChange={setSearchField}
@@ -264,7 +261,7 @@ const CustomerManagement = () => {
 
         <Table
           columns={columns}
-          data={customers}
+          data={machine}
           loading={loading}
           onEdit={handleEdit}
           onDelete={handleDelete}
@@ -283,11 +280,11 @@ const CustomerManagement = () => {
         <Box
           title={
             modalMode === "create"
-              ? "Thêm mới Khách hàng"
+              ? "Thêm mới Thợ"
               : "Cập nhật Khách hàng"
           }
           fields={
-            modalMode === "create" ? customerFormFields : editCustomerFormFields
+            modalMode === "create" ? machineFormFields : editMachineFormFields
           }
           initialData={editingData}
           onClose={() => setIsModalOpen(false)}
@@ -300,12 +297,12 @@ const CustomerManagement = () => {
         isOpen={isConfirmModalOpen}
         onClose={() => setIsConfirmModalOpen(false)}
         onConfirm={confirmDelete}
-        title="Xác nhận xóa khách hàng"
+        title="Xác nhận xóa Thợ"
       >
         <p>
-          Bạn có chắc chắn muốn xóa khách hàng{" "}
+          Bạn có chắc chắn muốn xóa thợ{" "}
           <strong className="text-red-600">
-            "{itemToDelete?.tenKhachHang}"
+            "{itemToDelete?.tenTho}"
           </strong>
           ?
         </p>
@@ -314,4 +311,4 @@ const CustomerManagement = () => {
   );
 };
 
-export default CustomerManagement;
+export default MachineManagement;

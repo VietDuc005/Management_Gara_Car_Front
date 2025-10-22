@@ -3,14 +3,16 @@ import { CheckCircle, XCircle, X } from "lucide-react";
 
 const toastTypes = {
   success: {
-    icon: <CheckCircle className="text-green-500" />,
-    style: "bg-white border-green-500",
-    textStyle: "text-green-700",
+    icon: <CheckCircle className="text-green-500 dark:text-green-400" />,
+    style:
+      "bg-white dark:bg-gray-800 border-green-500 dark:border-green-400",
+    textStyle: "text-green-700 dark:text-green-300",
   },
   error: {
-    icon: <XCircle className="text-red-500" />,
-    style: "bg-white border-red-500",
-    textStyle: "text-red-700",
+    icon: <XCircle className="text-red-500 dark:text-red-400" />,
+    style:
+      "bg-white dark:bg-gray-800 border-red-500 dark:border-red-400",
+    textStyle: "text-red-700 dark:text-red-300",
   },
 };
 
@@ -22,7 +24,7 @@ const Toast = ({ message, type, onClose }) => {
     const timer = setTimeout(() => {
       setExiting(true);
       setTimeout(onClose, 300); // Wait for animation to finish
-    }, 4000); // Auto-close after 4 seconds
+    }, 4000);
 
     return () => clearTimeout(timer);
   }, [onClose]);
@@ -47,7 +49,7 @@ const Toast = ({ message, type, onClose }) => {
       </div>
       <button
         onClick={handleClose}
-        className="text-gray-400 hover:text-gray-600"
+        className="text-gray-400 dark:text-gray-300 hover:text-gray-600 dark:hover:text-gray-100 transition"
       >
         <X size={18} />
       </button>
