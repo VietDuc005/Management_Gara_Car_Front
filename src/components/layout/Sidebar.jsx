@@ -30,6 +30,7 @@ function Sidebar({ onLogout, collapsed, setCollapsed }) {
     },
     { path: "/customers", label: "Khách hàng", icon: <Users size={20} /> },
     { path: "/machine", label: "Thợ", icon: <Wrench size={20} /> },
+    { path: "/repairs", label: "Phiếu sửa chữa", icon: <Wrench size={20} /> },
   ];
 
   const getNavLinkClass = ({ isActive }) =>

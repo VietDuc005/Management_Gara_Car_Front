@@ -20,6 +20,7 @@ import ServiceTypeManagement from "./pages/ServiceTypeManagement";
 import CustomerManagement from "./pages/CustomerManagement";
 import MachineManagement from "./pages/MachineManagement";
 
+import RepairManagement from "./pages/RepairManagement";
 // Thêm các trang khác vào đây khi bạn phát triển
 
 // ===================== ProtectedRoute Component =====================
@@ -69,6 +70,8 @@ function App() {
                 />
                 <Route path="customers" element={<CustomerManagement />} />
                 <Route path="machine" element={<MachineManagement />} />
+                <Route path="repairs" element={<RepairManagement />} />
+
                 {/* Thêm các route khác vào đây khi bạn phát triển */}
               </Route>
             </Route>

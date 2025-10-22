@@ -10,6 +10,7 @@ const pageTitles = {
   "/service-types": "Quản lý Loại Dịch vụ",
   "/customers": "Quản lý Khách hàng",
   "/machine": "Quản lý Thợ",
+  "/repairs": "Quản lý Phiếu sửa chữa",
 };
 
 const Layout = () => {
