@@ -7,7 +7,7 @@ import {
   Outlet,
 } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import { ToastProvider } from "./context/ToastContext"; // 1. Import ToastProvider
+import { ToastProvider } from "./context/ToastContext";
 
 // Auth components
 import Login from "./components/auth/Login";
@@ -17,6 +17,8 @@ import Layout from "./components/layout/Layout";
 
 // Pages
 import ServiceTypeManagement from "./pages/ServiceTypeManagement";
+import CustomerManagement from "./pages/CustomerManagement";
+// Thêm các trang khác vào đây khi bạn phát triển
 
 // ===================== ProtectedRoute Component =====================
 const ProtectedRoute = ({ requireAdmin = false }) => {
@@ -44,23 +46,28 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        {/* 2. Bao bọc toàn bộ ứng dụng bằng ToastProvider */}
         <ToastProvider>
           <Routes>
-            {/* --- Public routes --- */}
             <Route path="/login" element={<Login />} />
 
             {/* --- Protected routes --- */}
             <Route element={<ProtectedRoute />}>
+              {/* Layout sẽ là route cha, chứa Sidebar và Header */}
               <Route path="/" element={<Layout />}>
-                {/* Redirect from root to dashboard */}
-                <Route index element={<Navigate to="/dashboard" replace />} />
+                {/* Trang mặc định sẽ là service-types */}
                 <Route
-                  path="/service-types"
-                  element={<ServiceTypeManagement />}
+                  index
+                  element={<Navigate to="/service-types" replace />}
                 />
 
-                {/* --- Admin only --- */}
+                {/* Định nghĩa các trang con */}
+                <Route
+                  path="service-types"
+                  element={<ServiceTypeManagement />}
+                />
+                <Route path="customers" element={<CustomerManagement />} />
+
+                {/* Thêm các route khác vào đây khi bạn phát triển */}
               </Route>
             </Route>
 

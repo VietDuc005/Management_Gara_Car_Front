@@ -22,7 +22,7 @@ const Login = () => {
 
     try {
       await login(formData.username, formData.password);
-      navigate("/dashboard");
+      navigate("/service-types");
     } catch (err) {
       setError(err.message || "Đăng nhập thất bại. Vui lòng thử lại!");
     } finally {

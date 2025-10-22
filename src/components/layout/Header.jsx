@@ -1,15 +1,15 @@
 import React from "react";
 import { useAuth } from "../../context/AuthContext";
 
-const Header = () => {
+const Header = ({ title }) => {
   const { user } = useAuth();
   const today = new Date().toLocaleDateString("vi-VN");
 
   return (
     <header className="flex justify-between items-center bg-white px-6 py-4 border-b border-gray-200 shadow-sm">
-      {/* Tiêu đề hệ thống */}
+      {/* Tiêu đề trang động */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-800">Garage Manager</h1>
+        <h1 className="text-2xl font-bold text-gray-800">{title}</h1>
         <p className="text-sm text-gray-500">
           Chào mừng trở lại,{" "}
           <span className="font-medium text-gray-700">{user?.username}</span>
