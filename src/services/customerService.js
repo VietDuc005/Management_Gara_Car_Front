@@ -20,7 +20,7 @@ export const customerService = {
     sortDirection = "desc"
   ) {
     const response = await apiCall(
-      `/api/khachhang?page=${page}&size=${size}&sortBy=${sortBy}&sortDirection=${sortDirection}`,
+      `/api/khachhang/hienThiDanhSach?page=${page}&size=${size}&sortBy=${sortBy}&sortDirection=${sortDirection}`,
       { method: "GET" }
     );
 
@@ -59,7 +59,7 @@ export const customerService = {
     }
 
     const response = await apiCall(
-      `/api/khachhang/search?${params.toString()}`,
+      `/api/khachhang/timKiem?${params.toString()}`,
       {
         method: "GET",
       }
