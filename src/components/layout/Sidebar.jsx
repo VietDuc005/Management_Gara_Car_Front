@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom"; // Import NavLink
-import { Users, Layers, LogOut, Menu } from "lucide-react";
+import { Users, Layers, LogOut, Menu, Wrench } from "lucide-react";
 
 function Sidebar({ onLogout, collapsed, setCollapsed }) {
   // Chỉ giữ lại các menu bạn đã làm
@@ -11,6 +11,7 @@ function Sidebar({ onLogout, collapsed, setCollapsed }) {
       icon: <Layers size={20} />,
     },
     { path: "/customers", label: "Khách hàng", icon: <Users size={20} /> },
+    { path: "/repairs", label: "Phiếu sửa chữa", icon: <Wrench size={20} /> },
   ];
 
   // Hàm để xác định class cho NavLink đang active
