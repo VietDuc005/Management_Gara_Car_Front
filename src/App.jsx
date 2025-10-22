@@ -18,22 +18,24 @@ import Layout from "./components/layout/Layout";
 // Pages
 import ServiceTypeManagement from "./pages/ServiceTypeManagement";
 import CustomerManagement from "./pages/CustomerManagement";
+import MachineManagement from "./pages/MachineManagement";
+
 // Thêm các trang khác vào đây khi bạn phát triển
 
 // ===================== ProtectedRoute Component =====================
 const ProtectedRoute = ({ requireAdmin = false }) => {
   const { user, isAdmin, loading } = useAuth();
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Đang tải...</p>
-        </div>
+ if (loading) {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+      <div className="text-center">
+        <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-gray-600 dark:text-gray-300">Đang tải...</p>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   if (!user) return <Navigate to="/login" replace />;
   if (requireAdmin && !isAdmin()) return <Navigate to="/login" replace />;
@@ -66,7 +68,7 @@ function App() {
                   element={<ServiceTypeManagement />}
                 />
                 <Route path="customers" element={<CustomerManagement />} />
-
+                <Route path="machine" element={<MachineManagement />} />
                 {/* Thêm các route khác vào đây khi bạn phát triển */}
               </Route>
             </Route>

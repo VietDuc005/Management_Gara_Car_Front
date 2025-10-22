@@ -13,11 +13,11 @@ import { Plus } from "lucide-react";
 const getStatusColor = (status) => {
   switch (status) {
     case "Hoạt động":
-      return "bg-green-100 text-green-800";
+      return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
     case "Đã xóa":
-      return "bg-red-100 text-red-700";
+      return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
     default:
-      return "bg-gray-100 text-gray-700";
+      return "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
   }
 };
 
@@ -40,11 +40,10 @@ const ServiceTypeManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("create");
   const [editingData, setEditingData] = useState(null);
-
-  // State để quản lý modal xác nhận
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
 
+  // === FETCH DATA ===
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
@@ -106,6 +105,7 @@ const ServiceTypeManagement = () => {
     fetchData();
   }, [fetchData]);
 
+  // === CRUD HANDLERS ===
   const handleCreateNew = () => {
     setEditingData(null);
     setModalMode("create");
@@ -125,7 +125,6 @@ const ServiceTypeManagement = () => {
 
   const confirmDelete = async () => {
     if (!itemToDelete) return;
-
     try {
       const response = await serviceTypeService.delete(itemToDelete.maLoai);
       showToast(response.message || "Xóa thành công!", "success");
@@ -163,6 +162,7 @@ const ServiceTypeManagement = () => {
     }
   };
 
+  // === CONFIG ===
   const createServiceTypeFields = [
     {
       name: "tenLoai",
@@ -188,10 +188,12 @@ const ServiceTypeManagement = () => {
     { value: "tenLoai", label: "Sắp xếp theo Tên" },
     { value: "ngayTao", label: "Sắp xếp theo Ngày tạo" },
   ];
+
   const searchOptions = [
     { value: "tenLoai", label: "Tìm theo Tên" },
     { value: "trangThai", label: "Tìm theo Trạng thái" },
   ];
+
   const columns = [
     { key: "maLoai", label: "Mã Loại" },
     { key: "tenLoai", label: "Tên Loại Dịch Vụ" },
@@ -211,10 +213,12 @@ const ServiceTypeManagement = () => {
     { key: "ngayTao", label: "Ngày Tạo", render: (value) => formatDate(value) },
   ];
 
+  // === RENDER ===
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between bg-white p-6 rounded-xl shadow">
-        <h2 className="text-xl font-bold text-gray-800">
+    <div className="space-y-6 transition-colors duration-300">
+      {/* Header box */}
+      <div className="flex items-center justify-between bg-white dark:bg-gray-900 p-6 rounded-xl shadow transition-colors duration-300">
+        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
           Quản lý Loại Dịch vụ
         </h2>
         <button
@@ -224,7 +228,9 @@ const ServiceTypeManagement = () => {
           <Plus size={18} /> Thêm mới
         </button>
       </div>
-      <div className="bg-white rounded-xl shadow-md p-4 flex flex-col md:flex-row justify-between items-center gap-4">
+
+      {/* Search + Sort */}
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md p-4 flex flex-col md:flex-row justify-between items-center gap-4 transition-colors duration-300">
         <SearchWithOptions
           searchField={searchField}
           searchTerm={searchTerm}
@@ -240,7 +246,8 @@ const ServiceTypeManagement = () => {
         />
       </div>
 
-      <div className="bg-white p-4 rounded-xl shadow-md">
+      {/* Table */}
+      <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md transition-colors duration-300">
         <Table
           columns={columns}
           data={data}
@@ -250,6 +257,7 @@ const ServiceTypeManagement = () => {
         />
       </div>
 
+      {/* Pagination */}
       <Pagination
         currentPage={pagination.page}
         totalPages={pagination.totalPages}
@@ -258,6 +266,7 @@ const ServiceTypeManagement = () => {
         }
       />
 
+      {/* Box modal */}
       {isModalOpen && (
         <Box
           title={
@@ -277,18 +286,16 @@ const ServiceTypeManagement = () => {
         />
       )}
 
+      {/* Confirm modal */}
       <ConfirmModal
         isOpen={isConfirmModalOpen}
         onClose={() => setIsConfirmModalOpen(false)}
         onConfirm={confirmDelete}
         title="Xác nhận xóa loại dịch vụ"
-      >
-        <p>
-          Bạn có chắc chắn muốn xóa loại dịch vụ{" "}
-          <strong className="text-red-600">"{itemToDelete?.tenLoai}"</strong>{" "}
-          không? Hành động này không thể được hoàn tác.
-        </p>
-      </ConfirmModal>
+        message={`Bạn có chắc chắn muốn xóa loại dịch vụ "${
+          itemToDelete?.tenLoai || ""
+        }" không? Hành động này không thể hoàn tác.`}
+      />
     </div>
   );
 };

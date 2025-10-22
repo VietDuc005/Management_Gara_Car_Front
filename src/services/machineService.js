@@ -1,10 +1,10 @@
 import { apiCall } from "./api";
 
 /**
- * Service quản lý Khách hàng
- * Đường dẫn gốc: /api/khachhang
+ * Service quản lý Thợ
+ * Đường dẫn gốc: /api/tho
  */
-export const customerService = {
+export const machineService = {
   /**
    * Lấy danh sách loại dịch vụ có phân trang và sắp xếp
    * @param {number} page - Số trang bắt đầu từ 0
@@ -16,11 +16,11 @@ export const customerService = {
   async getAll(
     page = 0,
     size = 10,
-    sortBy = "maKhachHang",
+    sortBy = "ngayVaoLam",
     sortDirection = "desc"
   ) {
     const response = await apiCall(
-      `/api/khachhang?page=${page}&size=${size}&sortBy=${sortBy}&sortDirection=${sortDirection}`,
+      `/api/tho/hienThiDanhSach?page=${page}&size=${size}&sortBy=${sortBy}&sortDirection=${sortDirection}`,
       { method: "GET" }
     );
 
@@ -28,7 +28,7 @@ export const customerService = {
   },
 
   /**
-   * Tìm kiếm loại dịch vụ theo tên hoặc trạng thái
+   * Tìm kiếm thợ theo tên hoặc trạng thái
    * @param {object} searchCriteria - { tenLoai: string, trangThai: string }
    * @param {number} page - Số trang
    * @param {number} size - Kích thước trang
@@ -42,24 +42,17 @@ export const customerService = {
     });
 
     // Chỉ thêm các tham số tìm kiếm nếu chúng có giá trị
-    if (searchCriteria.tenKhachHang) {
-      params.append("tenKhachHang", searchCriteria.tenKhachHang);
+    if (searchCriteria.tenTho) {
+      params.append("tenTho", searchCriteria.tenTho);
     }
     if (searchCriteria.trangThai) {
       params.append("trangThai", searchCriteria.trangThai);
     }
-    if (searchCriteria.soDienThoai) {
-      params.append("soDienThoai", searchCriteria.soDienThoai);
+    if (searchCriteria.chuyenMon) {
+      params.append("chuyenMon", searchCriteria.chuyenMon);
     }
-    if (searchCriteria.email) {
-      params.append("email", searchCriteria.email);
-    }
-    if (searchCriteria.loaiKhach) {
-      params.append("loaiKhach", searchCriteria.loaiKhach);
-    }
-
     const response = await apiCall(
-      `/api/khachhang/search?${params.toString()}`,
+      `/api/tho/timKiem?${params.toString()}`,
       {
         method: "GET",
       }
@@ -69,35 +62,35 @@ export const customerService = {
   },
 
   /**
-   * Thêm mới một loại dịch vụ
+   * Thêm mới một thợ
    * @param {object} data - Dữ liệu cần thêm, ví dụ: { tenLoai: "Tên mới" }
    * @returns {Promise<object>}
    */
   async create(data) {
-    return await apiCall("/api/khachhang/them", {
+    return await apiCall("/api/tho/them", {
       method: "POST",
       data: data, // axios sẽ tự động chuyển thành JSON
     });
   },
 
   /**
-   * Cập nhật một loại dịch vụ
-   * @param {number|string} id - Mã loại dịch vụ cần cập nhật
+   * Cập nhật một thợ
+   * @param {number|string} id - Mã thợ cần cập nhật
    * @param {object} data - Dữ liệu cập nhật, ví dụ: { tenLoai: "Tên mới" }
    */
   async update(id, data) {
-    return await apiCall(`/api/khachhang/${id}`, {
+    return await apiCall(`/api/tho/${id}`, {
       method: "PUT",
       data: data,
     });
   },
 
   /**
-   * Xóa một loại dịch vụ (thường là xóa mềm)
-   * @param {number|string} id - Mã loại dịch vụ cần xóa
+   * Xóa một thợ(thường là xóa mềm)
+   * @param {number|string} id - Mã thợ cần xóa
    */
   async delete(id) {
-    return await apiCall(`/api/khachhang/${id}`, {
+    return await apiCall(`/api/tho/${id}`, {
       method: "DELETE",
     });
   },
