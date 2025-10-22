@@ -18,6 +18,7 @@ import Layout from "./components/layout/Layout";
 // Pages
 import ServiceTypeManagement from "./pages/ServiceTypeManagement";
 import CustomerManagement from "./pages/CustomerManagement";
+import RepairManagement from "./pages/RepairManagement";
 // Thêm các trang khác vào đây khi bạn phát triển
 
 // ===================== ProtectedRoute Component =====================
@@ -66,6 +67,7 @@ function App() {
                   element={<ServiceTypeManagement />}
                 />
                 <Route path="customers" element={<CustomerManagement />} />
+                <Route path="repairs" element={<RepairManagement />} />
 
                 {/* Thêm các route khác vào đây khi bạn phát triển */}
               </Route>

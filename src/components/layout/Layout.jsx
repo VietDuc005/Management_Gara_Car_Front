@@ -9,6 +9,7 @@ import { AuthContext } from "../../context/AuthContext";
 const pageTitles = {
   "/service-types": "Quản lý Loại Dịch vụ",
   "/customers": "Quản lý Khách hàng",
+  "/repairs": "Quản lý Phiếu sửa chữa",
 };
 
 const Layout = () => {
