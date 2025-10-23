@@ -9,18 +9,19 @@ import RepairDetailsModal from "../components/common/RepairDetailsModal";
 import { Plus } from "lucide-react";
 import { formatDate, formatCurrency } from "../utils/helpers";
 
+// Cập nhật hàm getStatusColor với các class cho dark mode
 const getStatusColor = (status) => {
   switch (status) {
     case "Hoàn thành":
-      return "bg-green-100 text-green-800";
+      return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
     case "Đã giao":
-      return "bg-blue-100 text-blue-800";
+      return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
     case "Đang sửa":
-      return "bg-blue-100 text-blue-800";
+      return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
     case "Chờ xử lý":
-      return "bg-yellow-100 text-yellow-800";
+      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400";
     default:
-      return "bg-gray-100 text-gray-800";
+      return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
   }
 };
 
@@ -78,12 +79,10 @@ const RepairManagement = () => {
         );
       }
 
-      // ✅ API trả về: {success, message, data: {content: [], totalPages: ...}}
       if (
         responseData?.data?.content &&
         Array.isArray(responseData.data.content)
       ) {
-        // Sử dụng đúng key `maPhieu` cho `id`
         setRepairs(
           responseData.data.content.map((r) => ({ ...r, id: r.maPhieu }))
         );
@@ -92,14 +91,12 @@ const RepairManagement = () => {
           totalPages: responseData.data.totalPages || 1,
         }));
       } else if (responseData?.content && Array.isArray(responseData.content)) {
-        // Fallback: data trực tiếp ở root level
         setRepairs(responseData.content.map((r) => ({ ...r, id: r.maPhieu })));
         setPagination((p) => ({
           ...p,
           totalPages: responseData.totalPages || 1,
         }));
       } else if (Array.isArray(responseData)) {
-        // Fallback: trả về trực tiếp array
         setRepairs(responseData.map((r) => ({ ...r, id: r.maPhieu })));
         setPagination((p) => ({ ...p, totalPages: 1 }));
       } else {
@@ -133,7 +130,6 @@ const RepairManagement = () => {
     setIsDetailModalOpen(true);
   };
 
-  // ✅ Cập nhật columns với đầy đủ thông tin từ API
   const columns = [
     { key: "maPhieu", label: "Mã Phiếu" },
     { key: "maXe", label: "Mã Xe" },
@@ -146,7 +142,7 @@ const RepairManagement = () => {
       label: "Mô Tả",
       render: (value) => (
         <span
-          className="text-sm text-gray-600 max-w-xs truncate block"
+          className="text-sm text-gray-600 dark:text-gray-400 max-w-xs truncate block"
           title={value}
         >
           {value}
@@ -186,9 +182,10 @@ const RepairManagement = () => {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between bg-white p-6 rounded-xl shadow">
-        <h2 className="text-xl font-bold text-gray-800">
+    <div className="space-y-6 transition-colors duration-300">
+      {/* Header */}
+      <div className="flex items-center justify-between bg-white dark:bg-gray-900 p-6 rounded-xl shadow transition-colors duration-300">
+        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
           Quản lý Phiếu Sửa Chữa
         </h2>
         <button className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition">
@@ -196,36 +193,41 @@ const RepairManagement = () => {
         </button>
       </div>
 
-      <div className="bg-white rounded-xl shadow-md p-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      {/* Search & Sort Controls */}
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md p-4 flex flex-col md:flex-row justify-between items-center gap-4 transition-colors duration-300">
         <SearchWithOptions
-          {...{
-            searchField,
-            searchTerm,
-            options: searchOptions,
-            onSearchFieldChange: setSearchField,
-            onSearchTermChange: setSearchTerm,
-            placeholder: "Nhập giá trị tìm kiếm...",
-          }}
+          searchField={searchField}
+          searchTerm={searchTerm}
+          options={searchOptions}
+          onSearchFieldChange={setSearchField}
+          onSearchTermChange={setSearchTerm}
+          placeholder="Nhập giá trị tìm kiếm..."
         />
         <SortControls
-          {...{ sortConfig, options: sortOptions, onSortChange: setSortConfig }}
+          sortConfig={sortConfig}
+          options={sortOptions}
+          onSortChange={setSortConfig}
         />
       </div>
 
-      <div className="bg-white p-4 rounded-xl shadow-md overflow-x-auto">
+      {/* Table */}
+      <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md overflow-x-auto transition-colors duration-300">
         <Table
-          {...{ columns, data: repairs, loading, onView: handleViewDetails }}
+          columns={columns}
+          data={repairs}
+          loading={loading}
+          onView={handleViewDetails}
         />
       </div>
 
+      {/* Pagination */}
       <Pagination
-        {...{
-          currentPage: pagination.page,
-          totalPages: pagination.totalPages,
-          onPageChange: (p) => setPagination((prev) => ({ ...prev, page: p })),
-        }}
+        currentPage={pagination.page}
+        totalPages={pagination.totalPages}
+        onPageChange={(p) => setPagination((prev) => ({ ...prev, page: p }))}
       />
 
+      {/* Details Modal */}
       <RepairDetailsModal
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}

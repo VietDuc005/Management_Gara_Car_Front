@@ -1,6 +1,15 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { Users,Wrench, Layers, LogOut, Menu, Sun, Moon } from "lucide-react";
+import {
+  Users,
+  Wrench,
+  Layers,
+  LogOut,
+  Menu,
+  Sun,
+  Moon,
+  FileText,
+} from "lucide-react";
 
 function Sidebar({ onLogout, collapsed, setCollapsed }) {
   const [theme, setTheme] = React.useState(
@@ -30,7 +39,7 @@ function Sidebar({ onLogout, collapsed, setCollapsed }) {
     },
     { path: "/customers", label: "Khách hàng", icon: <Users size={20} /> },
     { path: "/machine", label: "Thợ", icon: <Wrench size={20} /> },
-    { path: "/repairs", label: "Phiếu sửa chữa", icon: <Wrench size={20} /> },
+    { path: "/repairs", label: "Phiếu sửa chữa", icon: <FileText size={20} /> },
   ];
 
   const getNavLinkClass = ({ isActive }) =>
