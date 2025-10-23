@@ -1,6 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import {
+  LayoutDashboard,
   Users,
   Wrench,
   Layers,
@@ -32,6 +33,7 @@ function Sidebar({ onLogout, collapsed, setCollapsed }) {
   };
 
   const menuItemsManage = [
+    { path: "/dashboard", label: "Trang chủ", icon: <LayoutDashboard size={20} /> },
     {
       path: "/service-types",
       label: "Loại Dịch vụ",

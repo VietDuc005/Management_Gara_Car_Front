@@ -16,6 +16,7 @@ import Login from "./components/auth/Login";
 import Layout from "./components/layout/Layout";
 
 // Pages
+import Dashboard from "./pages/Dashboard";
 import ServiceTypeManagement from "./pages/ServiceTypeManagement";
 import CustomerManagement from "./pages/CustomerManagement";
 import MachineManagement from "./pages/MachineManagement";
@@ -64,6 +65,7 @@ function App() {
                 />
 
                 {/* Định nghĩa các trang con */}
+                 <Route path="dashboard" element={<Dashboard />} />
                 <Route
                   path="service-types"
                   element={<ServiceTypeManagement />}
