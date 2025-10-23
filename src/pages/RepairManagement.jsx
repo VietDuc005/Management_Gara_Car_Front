@@ -6,20 +6,22 @@ import SearchWithOptions from "../components/common/SearchBar";
 import SortControls from "../components/common/SortControls";
 import Pagination from "../components/common/Pagination";
 import RepairDetailsModal from "../components/common/RepairDetailsModal";
+import Box from "../components/common/Box"; // Import Box component
 import { Plus } from "lucide-react";
 import { formatDate, formatCurrency } from "../utils/helpers";
 
-// Cập nhật hàm getStatusColor với các class cho dark mode
 const getStatusColor = (status) => {
   switch (status) {
     case "Hoàn thành":
       return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
     case "Đã giao":
-      return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
+      return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
     case "Đang sửa":
       return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
     case "Chờ xử lý":
       return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400";
+    case "Hủy sửa":
+      return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
     default:
       return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
   }
@@ -30,6 +32,12 @@ const RepairManagement = () => {
   const [repairs, setRepairs] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // States for modals
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedRepair, setSelectedRepair] = useState(null);
+
+  // States for search, sort, pagination
   const [searchField, setSearchField] = useState("bienSo");
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
@@ -42,9 +50,6 @@ const RepairManagement = () => {
     sortBy: "ngayLap",
     sortDirection: "desc",
   });
-
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [selectedRepair, setSelectedRepair] = useState(null);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -79,10 +84,7 @@ const RepairManagement = () => {
         );
       }
 
-      if (
-        responseData?.data?.content &&
-        Array.isArray(responseData.data.content)
-      ) {
+      if (responseData?.data?.content) {
         setRepairs(
           responseData.data.content.map((r) => ({ ...r, id: r.maPhieu }))
         );
@@ -90,15 +92,12 @@ const RepairManagement = () => {
           ...p,
           totalPages: responseData.data.totalPages || 1,
         }));
-      } else if (responseData?.content && Array.isArray(responseData.content)) {
+      } else if (responseData?.content) {
         setRepairs(responseData.content.map((r) => ({ ...r, id: r.maPhieu })));
         setPagination((p) => ({
           ...p,
           totalPages: responseData.totalPages || 1,
         }));
-      } else if (Array.isArray(responseData)) {
-        setRepairs(responseData.map((r) => ({ ...r, id: r.maPhieu })));
-        setPagination((p) => ({ ...p, totalPages: 1 }));
       } else {
         setRepairs([]);
         setPagination((p) => ({ ...p, totalPages: 1, page: 0 }));
@@ -125,10 +124,48 @@ const RepairManagement = () => {
     fetchData();
   }, [fetchData]);
 
+  // === EVENT HANDLERS ===
   const handleViewDetails = (row) => {
     setSelectedRepair(row);
     setIsDetailModalOpen(true);
   };
+
+  const handleEdit = (row) => {
+    setSelectedRepair(row);
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateStatus = async (formData) => {
+    if (!selectedRepair || !formData.trangThai) return;
+    try {
+      setLoading(true);
+      const response = await repairService.updateStatus(
+        selectedRepair.maPhieu,
+        formData.trangThai
+      );
+      showToast(
+        response.message || "Cập nhật trạng thái thành công!",
+        "success"
+      );
+      setIsEditModalOpen(false);
+      fetchData();
+    } catch (err) {
+      showToast(err.message, "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // === UI CONFIGURATIONS ===
+  const editStatusFields = [
+    {
+      name: "trangThai",
+      label: "Trạng Thái Mới",
+      type: "select",
+      options: ["Chờ xử lý", "Đang sửa", "Đã giao", "Hoàn thành", "Hủy sửa"],
+      required: true,
+    },
+  ];
 
   const columns = [
     { key: "maPhieu", label: "Mã Phiếu" },
@@ -183,8 +220,7 @@ const RepairManagement = () => {
 
   return (
     <div className="space-y-6 transition-colors duration-300">
-      {/* Header */}
-      <div className="flex items-center justify-between bg-white dark:bg-gray-900 p-6 rounded-xl shadow transition-colors duration-300">
+      <div className="flex items-center justify-between bg-white dark:bg-gray-900 p-6 rounded-xl shadow">
         <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
           Quản lý Phiếu Sửa Chữa
         </h2>
@@ -193,8 +229,7 @@ const RepairManagement = () => {
         </button>
       </div>
 
-      {/* Search & Sort Controls */}
-      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md p-4 flex flex-col md:flex-row justify-between items-center gap-4 transition-colors duration-300">
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md p-4 flex flex-col md:flex-row justify-between items-center gap-4">
         <SearchWithOptions
           searchField={searchField}
           searchTerm={searchTerm}
@@ -210,29 +245,38 @@ const RepairManagement = () => {
         />
       </div>
 
-      {/* Table */}
-      <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md overflow-x-auto transition-colors duration-300">
+      <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md overflow-x-auto">
         <Table
           columns={columns}
           data={repairs}
           loading={loading}
           onView={handleViewDetails}
+          onEdit={handleEdit}
         />
       </div>
 
-      {/* Pagination */}
       <Pagination
         currentPage={pagination.page}
         totalPages={pagination.totalPages}
         onPageChange={(p) => setPagination((prev) => ({ ...prev, page: p }))}
       />
 
-      {/* Details Modal */}
       <RepairDetailsModal
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         data={selectedRepair}
       />
+
+      {isEditModalOpen && (
+        <Box
+          title={`Cập nhật P.S.C #${selectedRepair?.maPhieu}`}
+          fields={editStatusFields}
+          initialData={selectedRepair}
+          onClose={() => setIsEditModalOpen(false)}
+          onSubmit={handleUpdateStatus}
+          mode="edit"
+        />
+      )}
     </div>
   );
 };

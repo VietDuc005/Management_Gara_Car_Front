@@ -19,6 +19,8 @@ import Layout from "./components/layout/Layout";
 import ServiceTypeManagement from "./pages/ServiceTypeManagement";
 import CustomerManagement from "./pages/CustomerManagement";
 import MachineManagement from "./pages/MachineManagement";
+import ServiceManagement from "./pages/ServiceManagement";
+import ServiceDetail from "./pages/ServiceDetail";
 
 import RepairManagement from "./pages/RepairManagement";
 // Thêm các trang khác vào đây khi bạn phát triển
@@ -27,16 +29,16 @@ import RepairManagement from "./pages/RepairManagement";
 const ProtectedRoute = ({ requireAdmin = false }) => {
   const { user, isAdmin, loading } = useAuth();
 
- if (loading) {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
-      <div className="text-center">
-        <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-        <p className="text-gray-600 dark:text-gray-300">Đang tải...</p>
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-300">Đang tải...</p>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
   if (!user) return <Navigate to="/login" replace />;
   if (requireAdmin && !isAdmin()) return <Navigate to="/login" replace />;
@@ -71,7 +73,8 @@ function App() {
                 <Route path="customers" element={<CustomerManagement />} />
                 <Route path="machine" element={<MachineManagement />} />
                 <Route path="repairs" element={<RepairManagement />} />
-
+                <Route path="services" element={<ServiceManagement />} />
+                <Route path="services/:id" element={<ServiceDetail />} />
                 {/* Thêm các route khác vào đây khi bạn phát triển */}
               </Route>
             </Route>
