@@ -40,4 +40,20 @@ export const repairService = {
       method: "GET",
     });
   },
+
+  /**
+   * Cập nhật trạng thái của một phiếu sửa chữa
+   * @param {number|string} id - Mã phiếu sửa chữa
+   * @param {string} newStatus - Trạng thái mới
+   */
+  async updateStatus(id, newStatus) {
+    // Mã hóa (encode) trạng thái để xử lý ký tự tiếng Việt trong URL
+    const encodedStatus = encodeURIComponent(newStatus);
+    return await apiCall(
+      `/api/phieusuachua/${id}/capNhatTrangThai?trangThai=${encodedStatus}`,
+      {
+        method: "PATCH", // Hoặc 'POST' tùy vào backend, 'PUT' thường dùng cho cập nhật
+      }
+    );
+  },
 };
