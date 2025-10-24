@@ -9,6 +9,7 @@ import {
   Menu,
   Sun,
   Moon,
+  Car,
   FileText,
 } from "lucide-react";
 
@@ -33,7 +34,11 @@ function Sidebar({ onLogout, collapsed, setCollapsed }) {
   };
 
   const menuItemsManage = [
-    { path: "/dashboard", label: "Trang chủ", icon: <LayoutDashboard size={20} /> },
+    {
+      path: "/dashboard",
+      label: "Trang chủ",
+      icon: <LayoutDashboard size={20} />,
+    },
     {
       path: "/service-types",
       label: "Loại Dịch vụ",
@@ -43,6 +48,7 @@ function Sidebar({ onLogout, collapsed, setCollapsed }) {
     { path: "/machine", label: "Thợ", icon: <Wrench size={20} /> },
     { path: "/repairs", label: "Phiếu sửa chữa", icon: <FileText size={20} /> },
     { path: "/services", label: "Dịch vụ", icon: <FileText size={20} /> },
+    { path: "/vehicles", label: "Phương tiện", icon: <Car size={20} /> },
   ];
 
   const getNavLinkClass = ({ isActive }) =>

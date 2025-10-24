@@ -22,6 +22,8 @@ import CustomerManagement from "./pages/CustomerManagement";
 import MachineManagement from "./pages/MachineManagement";
 import ServiceManagement from "./pages/ServiceManagement";
 import ServiceDetail from "./pages/ServiceDetail";
+// Corrected import
+import VehicleManagement from "./pages/VehicleMangement";
 
 import RepairManagement from "./pages/RepairManagement";
 // Thêm các trang khác vào đây khi bạn phát triển
@@ -67,7 +69,7 @@ function App() {
                 />
 
                 {/* Định nghĩa các trang con */}
-                 <Route path="dashboard" element={<Dashboard />} />
+                <Route path="dashboard" element={<Dashboard />} />
                 <Route
                   path="service-types"
                   element={<ServiceTypeManagement />}
@@ -77,6 +79,7 @@ function App() {
                 <Route path="repairs" element={<RepairManagement />} />
                 <Route path="services" element={<ServiceManagement />} />
                 <Route path="services/:id" element={<ServiceDetail />} />
+                <Route path="vehicles" element={<VehicleManagement />} />
                 {/* Thêm các route khác vào đây khi bạn phát triển */}
               </Route>
             </Route>

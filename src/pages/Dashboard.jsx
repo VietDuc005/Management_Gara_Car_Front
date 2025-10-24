@@ -16,7 +16,14 @@ import {
 import { statisticService } from "../services/statisticService";
 
 // Màu cho biểu đồ
-const COLORS = ["#fb923c", "#10b981", "#06b6d4", "#f59e0b", "#8b5cf6", "#ef4444"];
+const COLORS = [
+  "#fb923c",
+  "#10b981",
+  "#06b6d4",
+  "#f59e0b",
+  "#8b5cf6",
+  "#ef4444",
+];
 
 const Dashboard = () => {
   const [overview, setOverview] = useState(null);
@@ -38,43 +45,42 @@ const Dashboard = () => {
   }, []);
 
   // ======== GỌI API: DOANH THU ========
-const fetchRevenue = useCallback(async () => {
-  try {
-    const today = new Date().toISOString().split("T")[0];
-    let res;
+  const fetchRevenue = useCallback(async () => {
+    try {
+      const today = new Date().toISOString().split("T")[0];
+      let res;
 
-    if (activeTab === "Tuần") {
-      res = await statisticService.getDoanhthutuan(today);
-    } else if (activeTab === "Tháng") {
-      const thang = new Date().getMonth() + 1;
-      const nam = new Date().getFullYear();
-      res = await statisticService.getDoanhthuthang(thang, nam);
-    } else if (activeTab === "Năm") {
-      const nam = new Date().getFullYear();
-      res = await statisticService.getDoanhthunam(nam);
+      if (activeTab === "Tuần") {
+        res = await statisticService.getDoanhthutuan(today);
+      } else if (activeTab === "Tháng") {
+        const thang = new Date().getMonth() + 1;
+        const nam = new Date().getFullYear();
+        res = await statisticService.getDoanhthuthang(thang, nam);
+      } else if (activeTab === "Năm") {
+        const nam = new Date().getFullYear();
+        res = await statisticService.getDoanhthunam(nam);
+      }
+
+      const data = res?.data?.data || res?.data || {};
+
+      // 🔹 Ưu tiên chọn đúng trường chi tiết theo loại
+      const raw =
+        data.chiTietTheoNgay ||
+        data.chiTietTheoTuan ||
+        data.chiTietTheoQuy ||
+        {};
+
+      // 🔹 Map về mảng [{ name, value }]
+      const mapped = Object.entries(raw).map(([key, val]) => ({
+        name: key,
+        value: val,
+      }));
+
+      setRevenueData(mapped);
+    } catch (err) {
+      console.error("❌ Lỗi tải biểu đồ doanh thu:", err);
     }
-
-    const data = res?.data?.data || res?.data || {};
-
-    // 🔹 Ưu tiên chọn đúng trường chi tiết theo loại
-    const raw =
-      data.chiTietTheoNgay ||
-      data.chiTietTheoTuan ||
-      data.chiTietTheoQuy ||
-      {};
-
-    // 🔹 Map về mảng [{ name, value }]
-    const mapped = Object.entries(raw).map(([key, val]) => ({
-      name: key,
-      value: val,
-    }));
-
-    setRevenueData(mapped);
-  } catch (err) {
-    console.error("❌ Lỗi tải biểu đồ doanh thu:", err);
-  }
-}, [activeTab]);
-
+  }, [activeTab]);
 
   // ======== GỌI API: TỶ LỆ SỬ DỤNG DỊCH VỤ ========
   const fetchUsageRate = useCallback(async () => {
@@ -107,58 +113,57 @@ const fetchRevenue = useCallback(async () => {
 
   // ======== BOX THỐNG KÊ ========
   const overviewFields = overview
-  ? [
-      {
-        label: "Tổng số Dịch vụ",
-        value: overview.tongSoDichVu,
-        icon: "package",
-        color: "text-orange-500",
-        bg: "bg-gradient-to-r from-orange-100 via-orange-200 to-orange-300 dark:from-orange-900/40 dark:via-orange-800/40 dark:to-orange-700/40",
-        border: "border-l-4 border-orange-400",
-      },
-      {
-        label: "Tổng số Lượng tồn",
-        value: overview.tongSoLuongTon,
-        icon: "layers",
-        color: "text-sky-500",
-        bg: "bg-gradient-to-r from-sky-100 via-sky-200 to-sky-300 dark:from-sky-900/40 dark:via-sky-800/40 dark:to-sky-700/40",
-        border: "border-l-4 border-sky-400",
-      },
-      {
-        label: "Tổng số Thợ",
-        value: overview.tongSoTho,
-        icon: "wrench",
-        color: "text-emerald-500",
-        bg: "bg-gradient-to-r from-emerald-100 via-emerald-200 to-emerald-300 dark:from-emerald-900/40 dark:via-emerald-800/40 dark:to-emerald-700/40",
-        border: "border-l-4 border-emerald-400",
-      },
-      {
-        label: "Tổng số Loại dịch vụ",
-        value: overview.tongSoLoaiDichVu,
-        icon: "shopping-bag",
-        color: "text-violet-500",
-        bg: "bg-gradient-to-r from-violet-100 via-violet-200 to-violet-300 dark:from-violet-900/40 dark:via-violet-800/40 dark:to-violet-700/40",
-        border: "border-l-4 border-violet-400",
-      },
-      {
-        label: "Tổng số Khách hàng",
-        value: overview.tongSoKhachHang,
-        icon: "users",
-        color: "text-rose-500",
-        bg: "bg-gradient-to-r from-rose-100 via-rose-200 to-rose-300 dark:from-rose-900/40 dark:via-rose-800/40 dark:to-rose-700/40",
-        border: "border-l-4 border-rose-400",
-      },
-      {
-        label: "Hóa đơn đã thanh toán",
-        value: overview.tongSoHoaDonDaThanhToan,
-        icon: "file-text",
-        color: "text-amber-500",
-        bg: "bg-gradient-to-r from-amber-100 via-amber-200 to-amber-300 dark:from-amber-900/40 dark:via-amber-800/40 dark:to-amber-700/40",
-        border: "border-l-4 border-amber-400",
-      },
-    ]
-  : [];
-
+    ? [
+        {
+          label: "Tổng số Dịch vụ",
+          value: overview.tongSoDichVu,
+          icon: "package",
+          color: "text-orange-500",
+          bg: "bg-gradient-to-r from-orange-100 via-orange-200 to-orange-300 dark:from-orange-900/40 dark:via-orange-800/40 dark:to-orange-700/40",
+          border: "border-l-4 border-orange-400",
+        },
+        {
+          label: "Tổng số Lượng tồn",
+          value: overview.tongSoLuongTon,
+          icon: "layers",
+          color: "text-sky-500",
+          bg: "bg-gradient-to-r from-sky-100 via-sky-200 to-sky-300 dark:from-sky-900/40 dark:via-sky-800/40 dark:to-sky-700/40",
+          border: "border-l-4 border-sky-400",
+        },
+        {
+          label: "Tổng số Thợ",
+          value: overview.tongSoTho,
+          icon: "wrench",
+          color: "text-emerald-500",
+          bg: "bg-gradient-to-r from-emerald-100 via-emerald-200 to-emerald-300 dark:from-emerald-900/40 dark:via-emerald-800/40 dark:to-emerald-700/40",
+          border: "border-l-4 border-emerald-400",
+        },
+        {
+          label: "Tổng số Loại dịch vụ",
+          value: overview.tongSoLoaiDichVu,
+          icon: "shopping-bag",
+          color: "text-violet-500",
+          bg: "bg-gradient-to-r from-violet-100 via-violet-200 to-violet-300 dark:from-violet-900/40 dark:via-violet-800/40 dark:to-violet-700/40",
+          border: "border-l-4 border-violet-400",
+        },
+        {
+          label: "Tổng số Khách hàng",
+          value: overview.tongSoKhachHang,
+          icon: "users",
+          color: "text-rose-500",
+          bg: "bg-gradient-to-r from-rose-100 via-rose-200 to-rose-300 dark:from-rose-900/40 dark:via-rose-800/40 dark:to-rose-700/40",
+          border: "border-l-4 border-rose-400",
+        },
+        {
+          label: "Hóa đơn đã thanh toán",
+          value: overview.tongSoHoaDonDaThanhToan,
+          icon: "file-text",
+          color: "text-amber-500",
+          bg: "bg-gradient-to-r from-amber-100 via-amber-200 to-amber-300 dark:from-amber-900/40 dark:via-amber-800/40 dark:to-amber-700/40",
+          border: "border-l-4 border-amber-400",
+        },
+      ]
+    : [];
 
   // ======== HIỂN THỊ UI ========
   if (loading)
@@ -185,7 +190,7 @@ const fetchRevenue = useCallback(async () => {
               {["Tuần", "Tháng", "Năm"].map((tab) => (
                 <button
                   key={tab}
-                   type="button" 
+                  type="button"
                   onClick={() => setActiveTab(tab)}
                   className={`px-3 py-1 rounded-md border text-sm font-medium ${
                     activeTab === tab
