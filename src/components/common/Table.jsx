@@ -65,7 +65,7 @@ function Table({ columns, data, onView, onEdit, onDelete, loading = false }) {
                           <Edit size={18} />
                         </button>
                       )}
-                      {onDelete && (
+                      {onDelete &&  row.trangThai !== "Đã xóa" && (
                         <button
                           onClick={() => onDelete(row)}
                           className="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition"
