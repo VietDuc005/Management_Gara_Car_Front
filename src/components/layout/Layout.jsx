@@ -8,6 +8,7 @@ import { AuthContext } from "../../context/AuthContext";
 // Ánh xạ đường dẫn sang tiêu đề trang
 const pageTitles = {
   "/dashboard": "Trang chủ",
+  "/invoice" : "Hóa đơn",
   "/service-types": "Quản lý Loại Dịch vụ",
   "/customers": "Quản lý Khách hàng",
   "/machine": "Quản lý Thợ",

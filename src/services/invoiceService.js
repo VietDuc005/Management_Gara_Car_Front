@@ -47,33 +47,23 @@ export const invoiceService = {
     return await apiCall(`/api/hoadon/timKiem?${params.toString()}`);
   },
 
-  /**
-   * Updates the status of a specific invoice.
-   * @param {number|string} maHoaDon - The ID of the invoice.
-   * @param {string} trangThai - The new status.
-   * @returns {Promise<object>}
-   */
+    
   async updateStatus(maHoaDon, trangThai) {
-    return await apiCall(`/api/hoadon/${maHoaDon}/trangThai`, {
-      method: "PATCH",
-      // The status is sent as a JSON object in the body
-      data: { trangThai },
-      headers: { "Content-Type": "application/json" },
-    });
+    const encodedStatus = encodeURIComponent(trangThai);
+    return await apiCall(
+      `/api/hoadon/${maHoaDon}/trangThai?trangThai=${encodedStatus}`,
+      { method: "PATCH" }
+    );
   },
 
   /**
-   * Updates the payment method of a specific invoice.
-   * @param {number|string} maHoaDon - The ID of the invoice.
-   * @param {string} kieuThanhToan - The new payment method.
-   * @returns {Promise<object>}
+   * Cập nhật kiểu thanh toán
    */
   async updatePaymentMethod(maHoaDon, kieuThanhToan) {
-    return await apiCall(`/api/hoadon/${maHoaDon}/kieuThanhToan`, {
-      method: "PATCH",
-      // The payment method is sent as a JSON object in the body
-      data: { kieuThanhToan },
-      headers: { "Content-Type": "application/json" },
-    });
+    const encodedMethod = encodeURIComponent(kieuThanhToan);
+    return await apiCall(
+      `/api/hoadon/${maHoaDon}/kieuThanhToan?kieuThanhToan=${encodedMethod}`,
+      { method: "PATCH" }
+    );
   },
 };
