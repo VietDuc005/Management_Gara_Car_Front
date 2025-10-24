@@ -224,13 +224,13 @@ const RepairManagement = () => {
         <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
           Quản lý Phiếu Sửa Chữa
         </h2>
-        <button className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition">
-          <Plus size={18} /> Lập phiếu mới
-        </button>
+        
       </div>
 
-      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md p-4 flex flex-col md:flex-row justify-between items-center gap-4">
-        <SearchWithOptions
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md p-4 flex flex-col sm:flex-row flex-wrap gap-4 justify-between items-center
+">        
+      <div className="w-full sm:w-auto flex-1 min-w-[250px]">
+   <SearchWithOptions
           searchField={searchField}
           searchTerm={searchTerm}
           options={searchOptions}
@@ -238,11 +238,18 @@ const RepairManagement = () => {
           onSearchTermChange={setSearchTerm}
           placeholder="Nhập giá trị tìm kiếm..."
         />
+</div>
+
+       
         <SortControls
           sortConfig={sortConfig}
           options={sortOptions}
           onSortChange={setSortConfig}
         />
+        <button className="w-full sm:w-auto justify-center active:scale-95 shadow-sm
+ flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition">
+          <Plus size={18} /> Lập phiếu mới
+        </button>
       </div>
 
       <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md overflow-x-auto">
