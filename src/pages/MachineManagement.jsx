@@ -76,6 +76,7 @@ const MachineManagement = () => {
           responseData.content.map((item) => ({
             ...item,
             id: item.maTho,
+            soDienThoai: formatPhoneNumberForDisplay(item.soDienThoai),
           }))
         );
         setPagination((prev) => ({
@@ -130,6 +131,7 @@ const MachineManagement = () => {
   };
 
   const confirmDelete = async () => {
+    
     if (!itemToDelete) return;
     try {
       await machineService.delete(itemToDelete.maTho);
@@ -142,22 +144,103 @@ const MachineManagement = () => {
       setItemToDelete(null);
     }
   };
+  const formatPhoneNumberForDisplay = (phone) => {
+  if (!phone) return "";
+  // Loại bỏ khoảng trắng
+  phone = phone.replace(/\s+/g, "");
+  // Nếu bắt đầu bằng +84 → chuyển thành 0
+  if (phone.startsWith("+84")) {
+    phone = "0" + phone.slice(3);
+  }
+  return phone;
+};
+const [formErrors, setFormErrors] = useState({}); 
+const [currentFormData, setCurrentFormData] = useState({});
+ const handleSave = async (formData) => {
+  const errors = {}; // ✅ Bổ sung khai báo lỗi
 
-  const handleSave = async (formData) => {
-    try {
-      if (modalMode === "create") {
-        await machineService.create(formData);
-        showToast("Thêm mới thợ thành công!", "success");
-      } else {
-        await machineService.update(editingData.maTho, formData);
-        showToast("Cập nhật khách hàng thành công!", "success");
-      }
-      setIsModalOpen(false);
-      fetchData();
-    } catch (err) {
-      showToast(err.message, "error");
+  // 🚧 Kiểm tra trống
+  if (!formData.tenTho?.trim()) {
+    errors.tenTho = "Vui lòng nhập tên thợ.";
+  }
+  if (!formData.chuyenMon?.trim()) {
+    errors.chuyenMon = "Vui lòng nhập chuyên môn.";
+  }
+  if (!formData.soDienThoai?.trim()) {
+    errors.soDienThoai = "Vui lòng nhập số điện thoại.";
+  }
+
+  // 🚧 Kiểm tra định dạng số điện thoại VN
+  const phonePattern = /^(0[0-9]{9}|\+84\s?[0-9]{9})$/;
+  if (
+    formData.soDienThoai &&
+    !phonePattern.test(formData.soDienThoai)
+  ) {
+    errors.soDienThoai =
+      "Số điện thoại VN không hợp lệ (vd: 0901234567, +84901234567, hoặc +84 901234567)";
+  }
+
+  // 🚧 Kiểm tra email
+  if (!formData.email?.trim()) {
+    errors.email = "Email không được để trống.";
+  } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    errors.email = "Email không hợp lệ.";
+  }
+
+  // 🚧 Kiểm tra kinh nghiệm
+    if (formData.kinhNghiem?.toString().trim()) {
+    const kinhNghiemValue = Number(formData.kinhNghiem);
+    if (isNaN(kinhNghiemValue)) {
+      errors.kinhNghiem = "Kinh nghiệm phải là số.";
+    } else if (kinhNghiemValue < 0) {
+      errors.kinhNghiem = "Kinh nghiệm không được âm.";
+    } else if (kinhNghiemValue > 50) {
+      errors.kinhNghiem = "Kinh nghiệm không được vượt quá 50 năm.";
     }
-  };
+  } else {
+    // 🚀 Nếu bỏ trống hoặc null → gán mặc định = 0
+    formData.kinhNghiem = 0;
+  }
+
+  // 🚨 Nếu có lỗi → hiển thị, focus vào ô đầu tiên
+  if (Object.keys(errors).length > 0) {
+    setFormErrors(errors);
+    setCurrentFormData(formData);
+    showToast(Object.values(errors)[0], "error");
+
+    const firstErrorField = Object.keys(errors)[0];
+    setTimeout(() => {
+      const input =
+        document.getElementById(firstErrorField) ||
+        document.querySelector(`[name="${firstErrorField}"]`);
+      if (input) {
+        input.focus();
+        input.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 150);
+    return;
+  }
+
+  // ✅ Nếu không có lỗi → reset lỗi, tiến hành submit
+  setFormErrors({});
+  try {
+    if (modalMode === "create") {
+      await machineService.create(formData);
+      showToast("Thêm mới thợ thành công!", "success");
+    } else {
+      await machineService.update(editingData.maTho, formData);
+      showToast("Cập nhật thợ thành công!", "success");
+    }
+
+    setIsModalOpen(false);
+    setCurrentFormData({});
+    fetchData();
+  } catch (err) {
+    showToast(err.message, "error");
+  }
+};
+
+
 
   const machineFormFields = [
     {
@@ -203,6 +286,7 @@ const MachineManagement = () => {
   const searchOptions = [
     { value: "tenTho", label: "Tìm theo Tên" },
     { value: "chuyenMon", label: "Tìm theo Chuyên môn" },
+    { value: "kinhNghiem", label: "Tìm theo Kinh nghiệm" },
     { value: "trangThai", label: "Tìm theo Trạng thái" },
     
   ];
@@ -277,21 +361,25 @@ const MachineManagement = () => {
       />
 
       {isModalOpen && (
-        <Box
-          title={
-            modalMode === "create"
-              ? "Thêm mới Thợ"
-              : "Cập nhật Khách hàng"
-          }
-          fields={
-            modalMode === "create" ? machineFormFields : editMachineFormFields
-          }
-          initialData={editingData}
-          onClose={() => setIsModalOpen(false)}
-          onSubmit={handleSave}
-          mode={modalMode}
-        />
-      )}
+  <Box
+    title={
+      modalMode === "create"
+        ? "Thêm mới Thợ"
+        : "Cập nhật Thợ"
+    }
+    fields={
+      modalMode === "create" ? machineFormFields : editMachineFormFields
+    }
+    initialData={Object.keys(currentFormData).length > 0 ? currentFormData : editingData}
+    onClose={() => {
+      setIsModalOpen(false);
+      setCurrentFormData({}); // reset khi đóng form
+    }}
+    onSubmit={handleSave}
+    mode={modalMode}
+  />
+)}
+
 
       <ConfirmModal
         isOpen={isConfirmModalOpen}
