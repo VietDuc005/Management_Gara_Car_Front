@@ -39,6 +39,7 @@ function Sidebar({ onLogout, collapsed, setCollapsed }) {
       label: "Trang chủ",
       icon: <LayoutDashboard size={20} />,
     },
+    { path: "/invoice", label: "Hóa đơn", icon: <Users size={20} /> },
     {
       path: "/service-types",
       label: "Loại Dịch vụ",

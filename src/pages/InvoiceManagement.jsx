@@ -139,17 +139,18 @@ const InvoiceManagement = () => {
     try {
       let response;
 
-      if (fieldName === "trangThai") {
-        response = await invoiceService.updateStatus(
-          invoiceToUpdate.maHoaDon,
-          newValue
-        );
-      } else if (fieldName === "kieuThanhToan") {
-        response = await invoiceService.updatePaymentMethod(
-          invoiceToUpdate.maHoaDon,
-          newValue
-        );
-      }
+     if (fieldName === "trangThai") {
+  response = await invoiceService.updateStatus(
+    invoiceToUpdate.maHoaDon,
+    newValue
+  );
+} else if (fieldName === "kieuThanhToan") {
+  response = await invoiceService.updatePaymentMethod(
+    invoiceToUpdate.maHoaDon,
+    newValue
+  );
+}
+
 
       if (response?.success) {
         showToast(response.message || "Cập nhật thành công!", "success");
@@ -221,7 +222,7 @@ const InvoiceManagement = () => {
           onSearchFieldChange={setSearchField}
           onSearchTermChange={setSearchTerm}
           options={searchOptions}
-          placeholder="Nhập trạng thái (ví dụ: Đã thanh toán)"
+          placeholder="Nhập trạng thái"
         />
         <SortControls
           sortConfig={sortConfig}

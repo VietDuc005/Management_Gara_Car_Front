@@ -8,6 +8,8 @@ import {
   Users,
   FileText,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
 
 // 🔹 Map icon name sang component Lucide tương ứng
 const iconMap = {
@@ -20,6 +22,7 @@ const iconMap = {
 };
 
 const BoxOnView = ({ title, fields = [] }) => {
+  const navigate = useNavigate();
   return (
     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md p-6 transition-colors duration-300">
       {title && (
@@ -29,13 +32,15 @@ const BoxOnView = ({ title, fields = [] }) => {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {fields.map((item, index) => (
+        {fields.map((item) => (
           <div
-            key={index}
-            className={`flex justify-between items-center p-5 rounded-xl 
-                        shadow-sm hover:shadow-md transition-all duration-300
-                        ${item.bg || ""} border border-transparent hover:scale-[1.02]
-                        dark:shadow-gray-900/30`}
+          key={item.label}
+className={`flex justify-between items-center p-5 rounded-xl 
+            shadow-sm hover:shadow-md transition-all duration-300
+            ${item.bg || ""} border border-transparent hover:scale-[1.02] transition ${item.bg} ${item.border}
+            dark:shadow-gray-900/30`}
+onClick={() => item.link && navigate(item.link)}
+
           >
             {/* ICON */}
             <div

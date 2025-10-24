@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import BoxOnView from "../components/common/BoxOnView";
 import {
   BarChart,
@@ -25,7 +26,10 @@ const COLORS = [
   "#ef4444",
 ];
 
+
 const Dashboard = () => {
+  const navigate = useNavigate();
+
   const [overview, setOverview] = useState(null);
   const [revenueData, setRevenueData] = useState([]);
   const [usageData, setUsageData] = useState([]);
@@ -121,6 +125,7 @@ const Dashboard = () => {
           color: "text-orange-500",
           bg: "bg-gradient-to-r from-orange-100 via-orange-200 to-orange-300 dark:from-orange-900/40 dark:via-orange-800/40 dark:to-orange-700/40",
           border: "border-l-4 border-orange-400",
+          link : "/services",
         },
         {
           label: "Tổng số Lượng tồn",
@@ -129,6 +134,8 @@ const Dashboard = () => {
           color: "text-sky-500",
           bg: "bg-gradient-to-r from-sky-100 via-sky-200 to-sky-300 dark:from-sky-900/40 dark:via-sky-800/40 dark:to-sky-700/40",
           border: "border-l-4 border-sky-400",
+          link: "/services",
+
         },
         {
           label: "Tổng số Thợ",
@@ -137,6 +144,7 @@ const Dashboard = () => {
           color: "text-emerald-500",
           bg: "bg-gradient-to-r from-emerald-100 via-emerald-200 to-emerald-300 dark:from-emerald-900/40 dark:via-emerald-800/40 dark:to-emerald-700/40",
           border: "border-l-4 border-emerald-400",
+          link :"/machine",
         },
         {
           label: "Tổng số Loại dịch vụ",
@@ -145,6 +153,7 @@ const Dashboard = () => {
           color: "text-violet-500",
           bg: "bg-gradient-to-r from-violet-100 via-violet-200 to-violet-300 dark:from-violet-900/40 dark:via-violet-800/40 dark:to-violet-700/40",
           border: "border-l-4 border-violet-400",
+          link:"/service-types",
         },
         {
           label: "Tổng số Khách hàng",
@@ -153,6 +162,7 @@ const Dashboard = () => {
           color: "text-rose-500",
           bg: "bg-gradient-to-r from-rose-100 via-rose-200 to-rose-300 dark:from-rose-900/40 dark:via-rose-800/40 dark:to-rose-700/40",
           border: "border-l-4 border-rose-400",
+          link: "/customers",
         },
         {
           label: "Hóa đơn đã thanh toán",
@@ -161,6 +171,7 @@ const Dashboard = () => {
           color: "text-amber-500",
           bg: "bg-gradient-to-r from-amber-100 via-amber-200 to-amber-300 dark:from-amber-900/40 dark:via-amber-800/40 dark:to-amber-700/40",
           border: "border-l-4 border-amber-400",
+          link: "/invoice",
         },
       ]
     : [];
