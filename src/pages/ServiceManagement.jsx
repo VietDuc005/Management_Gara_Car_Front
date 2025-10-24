@@ -228,15 +228,11 @@ const ServiceManagement = () => {
         <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
           Quản lý Dịch vụ
         </h2>
-        <button
-          onClick={handleCreateNew}
-          className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition"
-        >
-          <Plus size={18} /> Thêm dịch vụ
-        </button>
+       
       </div>
-      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md p-4 flex flex-col md:flex-row justify-between items-center gap-4">
-        <SearchWithOptions
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md p-4 flex flex-col sm:flex-row flex-wrap gap-4 justify-between items-center">
+        <div className="w-full sm:w-auto flex-1 min-w-[250px]">
+        <SearchWithOptions 
           {...{
             searchField,
             searchTerm,
@@ -246,9 +242,17 @@ const ServiceManagement = () => {
             placeholder: "Nhập tên hoặc loại dịch vụ...",
           }}
         />
+        </div>
         <SortControls
           {...{ sortConfig, options: sortOptions, onSortChange: setSortConfig }}
         />
+         <button
+          onClick={handleCreateNew}
+          className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition-all duration-200 transition-colors duration-300
+ w-full sm:w-auto justify-center active:scale-95 shadow-sm"
+        >
+          <Plus size={18} /> Thêm dịch vụ
+        </button>
       </div>
       <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md overflow-x-auto">
         <Table

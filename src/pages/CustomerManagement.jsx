@@ -237,29 +237,49 @@ const CustomerManagement = () => {
     Quản lý Khách hàng
   </h2>
 
-        <button
-          onClick={handleCreateNew}
-          className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition"
-        >
-          <Plus size={18} /> Thêm mới
-        </button>
+       
       </div>
-      <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md flex flex-col md:flex-row justify-between items-center gap-4 transition-colors duration-300">
-<SearchWithOptions
-          searchField={searchField}
-          searchTerm={searchTerm}
-          onSearchFieldChange={setSearchField}
-          onSearchTermChange={setSearchTerm}
-          options={searchOptions}
-          placeholder="Nhập giá trị cần tìm..."
-        />
-        <SortControls
-          sortConfig={sortConfig}
-          onSortChange={setSortConfig}
-          options={sortOptions}
-        />
-      </div>
+      <div
+  className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md 
+             flex flex-col sm:flex-row flex-wrap gap-4 justify-between 
+             items-center transition-colors duration-300"
+>
+  {/* Ô tìm kiếm */}
+  <div className="w-full sm:w-auto flex-1 min-w-[250px]">
+    <SearchWithOptions
+      searchField={searchField}
+      searchTerm={searchTerm}
+      onSearchFieldChange={setSearchField}
+      onSearchTermChange={setSearchTerm}
+      options={searchOptions}
+      placeholder="🔍 Nhập giá trị cần tìm..."
+    />
+  </div>
 
+  {/* Ô sắp xếp */}
+  <div className="w-full sm:w-auto">
+    <SortControls
+      sortConfig={sortConfig}
+      onSortChange={setSortConfig}
+      options={sortOptions}
+    />
+  </div>
+
+  {/* Nút thêm mới */}
+  <button
+    onClick={handleCreateNew}
+    className="flex items-center justify-center gap-2 px-4 py-2 
+               bg-orange-500 text-white rounded-lg font-semibold 
+               hover:bg-orange-600 active:scale-95 
+               transition-all duration-200 shadow-sm 
+               w-full sm:w-auto"
+  >
+    <Plus size={18} /> Thêm mới
+  </button>
+</div>
+
+      
+ 
       <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md transition-colors duration-300">
 
         <Table

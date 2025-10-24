@@ -241,17 +241,14 @@ const VehicleManagement = () => {
         <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
           Quản lý Xe
         </h2>
-        <button
-          onClick={handleCreateNew}
-          className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition"
-        >
-          <Plus size={18} /> Thêm mới
-        </button>
+       
       </div>
 
       {/* Search & Sort */}
-      <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md flex flex-col md:flex-row justify-between items-center gap-4 transition-colors duration-300">
-        <SearchWithOptions
+      <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md flex flex-col sm:flex-row flex-wrap gap-4 justify-between items-center
+ transition-colors duration-300">
+  <div className="w-full sm:w-auto flex-1 min-w-[250px]">
+   <SearchWithOptions
           searchField={searchField}
           searchTerm={searchTerm}
           onSearchFieldChange={setSearchField}
@@ -259,11 +256,21 @@ const VehicleManagement = () => {
           options={searchOptions}
           placeholder="Nhập giá trị tìm kiếm..."
         />
+</div>
+
+       
         <SortControls
           sortConfig={sortConfig}
           onSortChange={setSortConfig}
           options={sortOptions}
         />
+         <button
+          onClick={handleCreateNew}
+          className="w-full sm:w-auto justify-center active:scale-95 shadow-sm
+ flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition"
+        >
+          <Plus size={18} /> Thêm mới
+        </button>
       </div>
 
       {/* Table */}
