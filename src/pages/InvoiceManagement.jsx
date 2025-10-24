@@ -223,6 +223,7 @@ const InvoiceManagement = () => {
           onSearchTermChange={setSearchTerm}
           options={searchOptions}
           placeholder="Nhập trạng thái"
+          module = "invoice"
         />
         <SortControls
           sortConfig={sortConfig}
