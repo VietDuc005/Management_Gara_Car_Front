@@ -14,6 +14,7 @@ const pageTitles = {
   "/repairs": "Quản lý Phiếu sửa chữa",
   "/services": "Quản lý Dịch vụ",
   "/vehicles": "Quản lý Phương tiện",
+  "/invoices": "Quản lý Hóa đơn",
 };
 
 const Layout = () => {

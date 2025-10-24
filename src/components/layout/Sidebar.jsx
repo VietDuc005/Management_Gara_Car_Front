@@ -49,6 +49,7 @@ function Sidebar({ onLogout, collapsed, setCollapsed }) {
     { path: "/repairs", label: "Phiếu sửa chữa", icon: <FileText size={20} /> },
     { path: "/services", label: "Dịch vụ", icon: <FileText size={20} /> },
     { path: "/vehicles", label: "Phương tiện", icon: <Car size={20} /> },
+    { path: "/invoices", label: "Hóa đơn", icon: <Car size={20} /> },
   ];
 
   const getNavLinkClass = ({ isActive }) =>

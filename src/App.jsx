@@ -24,7 +24,7 @@ import ServiceManagement from "./pages/ServiceManagement";
 import ServiceDetail from "./pages/ServiceDetail";
 // Corrected import
 import VehicleManagement from "./pages/VehicleMangement";
-
+import InvoiceManagement from "./pages/InvoiceManagement";
 import RepairManagement from "./pages/RepairManagement";
 // Thêm các trang khác vào đây khi bạn phát triển
 
@@ -80,6 +80,7 @@ function App() {
                 <Route path="services" element={<ServiceManagement />} />
                 <Route path="services/:id" element={<ServiceDetail />} />
                 <Route path="vehicles" element={<VehicleManagement />} />
+                <Route path="invoices" element={<InvoiceManagement />} />
                 {/* Thêm các route khác vào đây khi bạn phát triển */}
               </Route>
             </Route>
