@@ -171,13 +171,56 @@ const [currentFormData, setCurrentFormData] = useState({});
   }
 
   // 🚧 Kiểm tra định dạng số điện thoại VN
-  const phonePattern = /^(0[0-9]{9}|\+84\s?[0-9]{9})$/;
+  const phonePattern = /^(0(32|33|34|35|36|37|38|39|56|57|58|59|70|71|72|73|74|75|76|77|78|79|81|82|83|84|85|88|89|90|91|92|93|94|96|97|98|99)\d{7}|\+84(32|33|34|35|36|37|38|39|56|57|58|59|70|71|72|73|74|75|76|77|78|79|81|82|83|84|85|88|89|90|91|92|93|94|96|97|98|99)\d{7})$/;
+
+const validNumbers = [
+  "0321234567",
+  "0389876543",
+  "0961234567",
+  "0701234567",
+  "0897654321",
+  "0912345678",
+  "0812345678",
+  "0561234567",
+  "0921234567",
+  "0591234567",
+  "+84321234567",
+  "+84961234567",
+  "+84701234567",
+  "+84181234567",
+  "+84561234567"
+];
+
+const invalidNumbers = [
+  "0311234567",
+  "090123456",
+  "09012345678",
+  "0123456789",
+  "09991234",
+  "+840901234567",
+  "+8499123456",
+  "1234567890",
+  "0781234567",
+  "08512345678",
+  "abcdefghij"
+];
+
+console.log("===== VALID NUMBERS =====");
+validNumbers.forEach(num => {
+  console.log(`${num} => ${phonePattern.test(num) ? "PASS ✅" : "FAIL ❌"}`);
+});
+
+console.log("\n===== INVALID NUMBERS =====");
+invalidNumbers.forEach(num => {
+  console.log(`${num} => ${phonePattern.test(num) ? "FAIL ❌" : "PASS ✅"}`);
+});
+
   if (
     formData.soDienThoai &&
     !phonePattern.test(formData.soDienThoai)
   ) {
     errors.soDienThoai =
-      "Số điện thoại VN không hợp lệ (vd: 0901234567, +84901234567, hoặc +84 901234567)";
+      "Số điện thoại không hợp lệ. Chỉ nhận số của các mạng VN (Viettel, Mobifone, Vinaphone, Vietnamobile, Gmobile). Nhập theo dạng 0xxxxxxxxx hoặc +84xxxxxxxx (vd: 0901234567, +84901234567)";
   }
 
   // 🚧 Kiểm tra email
@@ -286,6 +329,7 @@ const [currentFormData, setCurrentFormData] = useState({});
   const searchOptions = [
     { value: "tenTho", label: "Tìm theo Tên" },
     { value: "chuyenMon", label: "Tìm theo Chuyên môn" },
+    { value: "soDienThoai", label: "Tìm theo Số Điện Thoại" },
     { value: "kinhNghiem", label: "Tìm theo Kinh nghiệm" },
     { value: "trangThai", label: "Tìm theo Trạng thái" },
     
