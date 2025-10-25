@@ -5,6 +5,7 @@ import SearchWithOptions from "../components/common/SearchBar";
 import SortControls from "../components/common/SortControls";
 import Pagination from "../components/common/Pagination";
 import Box from "../components/common/Box";
+import BoxOnView from "../components/common/BoxOnView";
 import ConfirmModal from "../components/common/ConfirmModal";
 import { machineService } from "../services/machineService";
 import { Plus } from "lucide-react";
@@ -25,7 +26,7 @@ const MachineManagement = () => {
   const { showToast } = useToast();
   const [machine, setMachine] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const[overview,setOverview] = useState(null);
   const [searchField, setSearchField] = useState("tenTho");
   const [searchTerm, setSearchTerm] = useState("");
   const [pagination, setPagination] = useState({
@@ -100,6 +101,21 @@ const MachineManagement = () => {
     searchField,
     showToast,
   ]);
+// ======== GỌI API: TỔNG QUAN ========
+  const fetchOverview = useCallback(async () => {
+    try {
+      const res = await machineService.getthongkeTho();
+      setOverview(res.data || res);
+    } catch (err) {
+      console.error("❌ Lỗi khi tải tổng quan:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchOverview();
+  }, [fetchOverview]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -169,6 +185,9 @@ const [currentFormData, setCurrentFormData] = useState({});
   if (!formData.soDienThoai?.trim()) {
     errors.soDienThoai = "Vui lòng nhập số điện thoại.";
   }
+
+ 
+
 
   // 🚧 Kiểm tra định dạng số điện thoại VN
   const phonePattern = /^(0(32|33|34|35|36|37|38|39|56|57|58|59|70|71|72|73|74|75|76|77|78|79|81|82|83|84|85|88|89|90|91|92|93|94|96|97|98|99)\d{7}|\+84(32|33|34|35|36|37|38|39|56|57|58|59|70|71|72|73|74|75|76|77|78|79|81|82|83|84|85|88|89|90|91|92|93|94|96|97|98|99)\d{7})$/;
@@ -284,7 +303,38 @@ invalidNumbers.forEach(num => {
 };
 
 
-
+ const overviewFields = overview
+    ? [
+        {
+          label: "Tổng số Thợ",
+          value: overview.totalTho,
+          icon: "package",
+          color: "text-orange-500",
+          bg: "bg-gradient-to-r from-orange-100 via-orange-200 to-orange-300 dark:from-orange-900/40 dark:via-orange-800/40 dark:to-orange-700/40",
+          border: "border-l-4 border-orange-400",
+          
+        },
+        {
+          label: "Số thợ kinh nghiệm cao",
+          value: overview.kinhNghiemCao,
+          icon: "layers",
+          color: "text-sky-500",
+          bg: "bg-gradient-to-r from-sky-100 via-sky-200 to-sky-300 dark:from-sky-900/40 dark:via-sky-800/40 dark:to-sky-700/40",
+          border: "border-l-4 border-sky-400",
+          
+        },
+        {
+          label: "Số thợ kinh nghiệm thấp",
+          value: overview.kinhNghiemThap,
+          icon: "wrench",
+          color: "text-emerald-500",
+          bg: "bg-gradient-to-r from-emerald-100 via-emerald-200 to-emerald-300 dark:from-emerald-900/40 dark:via-emerald-800/40 dark:to-emerald-700/40",
+          border: "border-l-4 border-emerald-400",
+          
+        },
+        
+      ]
+    : [];
   const machineFormFields = [
     {
       name: "tenTho",
@@ -359,11 +409,7 @@ invalidNumbers.forEach(num => {
 
   return (
     <div className="space-y-6 transition-colors duration-300">
-      <div className="flex items-center justify-between bg-white dark:bg-gray-900 p-6 rounded-xl shadow transition-colors duration-300">
-  <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Quản lý Thợ</h2>
-
-        
-      </div>
+      <BoxOnView title="Tổng quan Thợ" fields={overviewFields} />
       <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md p-4 flex flex-col sm:flex-row flex-wrap gap-4 justify-between items-center
  transition-colors duration-300">
   <div className="w-full sm:w-auto flex-1 min-w-[250px]">
