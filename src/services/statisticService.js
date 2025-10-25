@@ -12,7 +12,9 @@ export const statisticService = {
 
   /** Lấy tỷ lệ sử dụng dịch vụ */
   async getTilesudung() {
-    return await apiCall(`/api/thongke/ti-le-su-dung-dich-vu`, { method: "GET" });
+    return await apiCall(`/api/thongke/ti-le-su-dung-dich-vu`, {
+      method: "GET",
+    });
   },
 
   /** Báo cáo doanh thu theo tuần (truyền vào ngày bất kỳ trong tuần đó) */
@@ -42,7 +44,8 @@ export const statisticService = {
   },
   async getThongKeHoaDon() {
     return await apiCall(`/api/thongke/hoa-don`, { method: "GET" });
-  //dùng cho phiếu sửa chữa
+    //dùng cho phiếu sửa chữa
+  },
   async getThongKePhieu() {
     return await apiCall(`/api/thongke/phieu-sua-chua`, { method: "GET" });
   },
