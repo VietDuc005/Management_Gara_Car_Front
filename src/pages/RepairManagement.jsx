@@ -7,6 +7,8 @@ import SortControls from "../components/common/SortControls";
 import Pagination from "../components/common/Pagination";
 import RepairDetailsModal from "../components/common/RepairDetailsModal";
 import Box from "../components/common/Box"; // Import Box component
+import BoxOnView from "../components/common/BoxOnView";
+import { statisticService } from "../services/statisticService";
 import { Plus } from "lucide-react";
 import { formatDate, formatCurrency } from "../utils/helpers";
 
@@ -29,6 +31,7 @@ const getStatusColor = (status) => {
 
 const RepairManagement = () => {
   const { showToast } = useToast();
+  const [overview, setOverview] = useState(null);
   const [repairs, setRepairs] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -119,10 +122,21 @@ const RepairManagement = () => {
     searchField,
     showToast,
   ]);
-
+// ======== GỌI API: TỔNG QUAN ========
+  const fetchOverview = useCallback(async () => {
+    try {
+      const res = await statisticService.getThongKePhieu();
+      setOverview(res.data || res);
+    } catch (err) {
+      console.error("❌ Lỗi khi tải tổng quan:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
   useEffect(() => {
+    fetchOverview();
     fetchData();
-  }, [fetchData]);
+  }, [fetchOverview, fetchData]);
 
   // === EVENT HANDLERS ===
   const handleViewDetails = (row) => {
@@ -217,16 +231,49 @@ const RepairManagement = () => {
     { value: "ngayLap", label: "Sắp xếp theo Ngày lập" },
     { value: "tongTien", label: "Sắp xếp theo Tổng tiền" },
   ];
-
+const overviewFields = overview
+    ? [
+        {
+          label: "Số phiếu đã giao",
+          value: overview.soPhieuDaGiao,
+          icon: "package",
+          color: "text-orange-500",
+          bg: "bg-gradient-to-r from-orange-100 via-orange-200 to-orange-300 dark:from-orange-900/40 dark:via-orange-800/40 dark:to-orange-700/40",
+          border: "border-l-4 border-orange-400",
+          
+        },
+        {
+          label: "Số phiếu đang sửa",
+          value: overview.soPhieuDangSua,
+          icon: "layers",
+          color: "text-sky-500",
+          bg: "bg-gradient-to-r from-sky-100 via-sky-200 to-sky-300 dark:from-sky-900/40 dark:via-sky-800/40 dark:to-sky-700/40",
+          border: "border-l-4 border-sky-400",
+         
+        },
+        {
+          label: "Số phiếu chờ xử lí",
+          value: overview.soPhieuChoXuLy,
+          icon: "wrench",
+          color: "text-emerald-500",
+          bg: "bg-gradient-to-r from-emerald-100 via-emerald-200 to-emerald-300 dark:from-emerald-900/40 dark:via-emerald-800/40 dark:to-emerald-700/40",
+          border: "border-l-4 border-emerald-400",
+          
+        },
+        {
+          label: "Tổng doanh thu",
+          value: overview.tongDoanhThu,
+          icon: "shopping-bag",
+          color: "text-violet-500",
+          bg: "bg-gradient-to-r from-violet-100 via-violet-200 to-violet-300 dark:from-violet-900/40 dark:via-violet-800/40 dark:to-violet-700/40",
+          border: "border-l-4 border-violet-400",
+          
+        },
+      ]
+    : [];
   return (
     <div className="space-y-6 transition-colors duration-300">
-      <div className="flex items-center justify-between bg-white dark:bg-gray-900 p-6 rounded-xl shadow">
-        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
-          Quản lý Phiếu Sửa Chữa
-        </h2>
-        
-      </div>
-
+      <BoxOnView title="Tổng quan phiếu sửa chữa" fields={overviewFields} />
       <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md p-4 flex flex-col sm:flex-row flex-wrap gap-4 justify-between items-center
 ">        
       <div className="w-full sm:w-auto flex-1 min-w-[250px]">
