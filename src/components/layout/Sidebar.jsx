@@ -18,14 +18,9 @@ function Sidebar({ onLogout, collapsed, setCollapsed }) {
     localStorage.getItem("theme") || "light"
   );
 
-  // Khi thay đổi theme -> cập nhật class HTML và lưu localStorage
   React.useEffect(() => {
     const root = window.document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
+    root.classList.toggle("dark", theme === "dark");
     localStorage.setItem("theme", theme);
   }, [theme]);
 
@@ -33,24 +28,27 @@ function Sidebar({ onLogout, collapsed, setCollapsed }) {
     setTheme(theme === "dark" ? "light" : "dark");
   };
 
-  const menuItemsManage = [
+  const menuTop = [
     {
       path: "/dashboard",
       label: "Trang chủ",
       icon: <LayoutDashboard size={20} />,
     },
-    { path: "/invoice", label: "Hóa đơn", icon: <Users size={20} /> },
     {
-      path: "/service-types",
-      label: "Loại Dịch vụ",
-      icon: <Layers size={20} />,
+      path: "/sales",
+      label: "Bán hàng",
+      icon: <Users size={20} />,
     },
+  ];
+
+  const menuBottom = [
+    { path: "/invoice", label: "Hóa đơn", icon: <FileText size={20} /> },
+    { path: "/service-types", label: "Loại Dịch vụ", icon: <Layers size={20} /> },
     { path: "/customers", label: "Khách hàng", icon: <Users size={20} /> },
     { path: "/machine", label: "Thợ", icon: <Wrench size={20} /> },
     { path: "/repairs", label: "Phiếu sửa chữa", icon: <FileText size={20} /> },
     { path: "/services", label: "Dịch vụ", icon: <FileText size={20} /> },
     { path: "/vehicles", label: "Phương tiện", icon: <Car size={20} /> },
-    { path: "/sales", label: "Bán hàng", icon: <Car size={20} /> },
   ];
 
   const getNavLinkClass = ({ isActive }) =>
@@ -77,7 +75,6 @@ function Sidebar({ onLogout, collapsed, setCollapsed }) {
           <button
             onClick={() => setCollapsed(!collapsed)}
             className="text-gray-600 dark:text-gray-300 hover:text-orange-500 transition"
-            title={collapsed ? "Mở rộng" : "Thu gọn"}
           >
             <Menu size={22} />
           </button>
@@ -85,7 +82,21 @@ function Sidebar({ onLogout, collapsed, setCollapsed }) {
 
         {/* Menu Items */}
         <nav className="px-3 pt-3">
-          {menuItemsManage.map((item) => (
+          {/* Group Top */}
+          {menuTop.map((item) => (
+            <NavLink key={item.path} to={item.path} className={getNavLinkClass}>
+              {item.icon}
+              {!collapsed && <span>{item.label}</span>}
+            </NavLink>
+          ))}
+
+          {/* Divider */}
+          {!collapsed && (
+            <div className="my-4 border-t border-gray-300 dark:border-gray-700" />
+          )}
+
+          {/* Group Bottom */}
+          {menuBottom.map((item) => (
             <NavLink key={item.path} to={item.path} className={getNavLinkClass}>
               {item.icon}
               {!collapsed && <span>{item.label}</span>}
@@ -94,16 +105,14 @@ function Sidebar({ onLogout, collapsed, setCollapsed }) {
         </nav>
       </div>
 
-      {/* Theme Toggle + Logout */}
+      {/* Theme + Logout */}
       <div className="p-4 border-t bg-gray-50 dark:bg-gray-800 dark:border-gray-700 flex flex-col gap-3">
-        {/* Nút chuyển Sáng / Tối */}
         <button
           onClick={toggleTheme}
           className={`flex items-center ${
             collapsed ? "justify-center" : "justify-start gap-3"
           } w-full py-2 font-semibold rounded-lg border border-gray-300 dark:border-gray-600
             hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200`}
-          title="Chuyển chế độ sáng/tối"
         >
           {theme === "dark" ? (
             <>
@@ -118,7 +127,6 @@ function Sidebar({ onLogout, collapsed, setCollapsed }) {
           )}
         </button>
 
-        {/* Nút Đăng xuất */}
         <button
           onClick={onLogout}
           className={`flex items-center ${

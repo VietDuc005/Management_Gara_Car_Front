@@ -146,9 +146,18 @@ const SalesManagement = () => {
           {" "}
           {/* Thêm pr-2 để tránh thanh cuộn che nội dung */}
           {loading ? (
-            <p className="text-center text-gray-500 dark:text-gray-300 py-10">
-              Đang tải dữ liệu...
-            </p>
+            
+  <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex items-center gap-2">
+      <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce"></div>
+      <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce delay-100"></div>
+      <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce delay-200"></div>
+    </div>
+
+    <p className="mt-4 text-gray-600 dark:text-gray-300 font-semibold tracking-wide">
+      Garage Manager đang tải dữ liệu...
+    </p>
+  </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
               {filteredServices.length > 0 ? (

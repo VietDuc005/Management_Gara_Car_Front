@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import BoxOnView from "../components/common/BoxOnView";
+import { useToast } from "../context/ToastContext";
+
 import {
   BarChart,
   Bar,
@@ -28,6 +30,7 @@ const COLORS = [
 
 const Dashboard = () => {
   const navigate = useNavigate();
+const { showToast } = useToast();
 
   const [overview, setOverview] = useState(null);
   const [revenueData, setRevenueData] = useState([]);
@@ -59,14 +62,14 @@ const Dashboard = () => {
       let res;
 
       if (activeTab === "Tuần") {
-        if (!selectedDate) return alert("Vui lòng chọn ngày (yyyy-mm-dd)");
+        if (!selectedDate) return showToast("Vui lòng chọn ngày (yyyy-mm-dd)", "warning");
         res = await statisticService.getDoanhthutuan(selectedDate);
       } else if (activeTab === "Tháng") {
         if (!selectedMonth || !selectedYear)
-          return alert("Vui lòng nhập tháng và năm!");
+          return showToast("Vui lòng nhập tháng và năm!", "warning");
         res = await statisticService.getDoanhthuthang(selectedMonth, selectedYear);
       } else if (activeTab === "Năm") {
-        if (!selectedYear) return alert("Vui lòng nhập năm!");
+        if (!selectedYear) return showToast("Vui lòng nhập năm!", "warning");
         res = await statisticService.getDoanhthunam(selectedYear);
       }
 
@@ -183,10 +186,18 @@ const Dashboard = () => {
   // ======== HIỂN THỊ UI ========
   if (loading)
     return (
-      <div className="flex items-center justify-center min-h-screen text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-950">
-        Đang tải dữ liệu...
-      </div>
-    );
+  <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex items-center gap-2">
+      <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce"></div>
+      <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce delay-100"></div>
+      <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce delay-200"></div>
+    </div>
+
+    <p className="mt-4 text-gray-600 dark:text-gray-300 font-semibold tracking-wide">
+      Garage Manager đang tải dữ liệu...
+    </p>
+  </div>
+);
 
   return (
     <div className="space-y-8 transition-colors duration-300">

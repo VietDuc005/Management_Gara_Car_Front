@@ -212,7 +212,20 @@ const ServiceTypeManagement = () => {
     },
     { key: "ngayTao", label: "Ngày Tạo", render: (value) => formatDate(value) },
   ];
+ if (loading)
+    return (
+  <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex items-center gap-2">
+      <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce"></div>
+      <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce delay-100"></div>
+      <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce delay-200"></div>
+    </div>
 
+    <p className="mt-4 text-gray-600 dark:text-gray-300 font-semibold tracking-wide">
+      Garage Manager đang tải dữ liệu...
+    </p>
+  </div>
+);
   // === RENDER ===
   return (
     <div className="space-y-6 transition-colors duration-300">
