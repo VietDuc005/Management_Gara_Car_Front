@@ -270,7 +270,7 @@ const VehicleManagement = () => {
         },
         {
           label: "Tổng số xe hoạt động",
-          value: overview.soxeHoatDong,
+          value: overview.soXeHoatDong,
           icon: "layers",
           color: "text-sky-500",
           bg: "bg-gradient-to-r from-sky-100 via-sky-200 to-sky-300 dark:from-sky-900/40 dark:via-sky-800/40 dark:to-sky-700/40",

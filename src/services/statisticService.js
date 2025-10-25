@@ -40,6 +40,8 @@ export const statisticService = {
   async getTopDichVu() {
     return await apiCall(`/api/thongke/top-5-dich-vu`, { method: "GET" });
   },
+  async getThongKeHoaDon() {
+    return await apiCall(`/api/thongke/hoa-don`, { method: "GET" });
   //dùng cho phiếu sửa chữa
   async getThongKePhieu() {
     return await apiCall(`/api/thongke/phieu-sua-chua`, { method: "GET" });

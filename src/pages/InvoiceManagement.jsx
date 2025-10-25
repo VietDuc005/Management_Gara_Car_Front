@@ -7,6 +7,8 @@ import Pagination from "../components/common/Pagination";
 import InvoiceDetailsModal from "../components/common/InvoiceDetailsModal";
 import UpdateInvoiceModal from "../components/common/UpdateInvoiceModal";
 import SearchWithOptions from "../components/common/SearchBar";
+import BoxOnView from "../components/common/BoxOnView";
+import { statisticService } from "../services/statisticService";
 import { formatDateTime, formatCurrency } from "../utils/helpers";
 
 const getStatusColor = (status) => {
@@ -26,7 +28,7 @@ const InvoiceManagement = () => {
   const { showToast } = useToast();
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const [overview, setOverview] = useState(null);
   const [searchField, setSearchField] = useState("trangThai");
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
@@ -118,10 +120,22 @@ const InvoiceManagement = () => {
     searchField,
     showToast,
   ]);
+// ======== GỌI API: TỔNG QUAN ========
+  const fetchOverview = useCallback(async () => {
+    try {
+      const res = await statisticService.getThongKeHoaDon();
+      setOverview(res.data || res);
+    } catch (err) {
+      console.error("❌ Lỗi khi tải tổng quan:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
+    fetchOverview();
     fetchData();
-  }, [fetchData]);
+  }, [fetchOverview, fetchData]);
 
   const handleViewDetails = (row) => {
     setSelectedInvoice(row);
@@ -207,14 +221,40 @@ const InvoiceManagement = () => {
 
   const searchOptions = [{ value: "trangThai", label: "Tìm theo Trạng thái" }];
 
+ const overviewFields = overview
+    ? [
+        {
+          label: "Tổng số hóa đơn",
+          value: overview.tongSoHoaDon,
+          icon: "package",
+          color: "text-orange-500",
+          bg: "bg-gradient-to-r from-orange-100 via-orange-200 to-orange-300 dark:from-orange-900/40 dark:via-orange-800/40 dark:to-orange-700/40",
+          border: "border-l-4 border-orange-400",
+         
+        },
+        {
+          label: "Số hóa đơn đã thanh toán",
+          value: overview.soHoaDonDaThanhToan,
+          icon: "layers",
+          color: "text-sky-500",
+          bg: "bg-gradient-to-r from-sky-100 via-sky-200 to-sky-300 dark:from-sky-900/40 dark:via-sky-800/40 dark:to-sky-700/40",
+          border: "border-l-4 border-sky-400",
+          
+        },
+        {
+          label: "Tổng doanh thu",
+          value: overview.tongDoanhThuDaThanhToan,
+          icon: "wrench",
+          color: "text-emerald-500",
+          bg: "bg-gradient-to-r from-emerald-100 via-emerald-200 to-emerald-300 dark:from-emerald-900/40 dark:via-emerald-800/40 dark:to-emerald-700/40",
+          border: "border-l-4 border-emerald-400",
+          
+        },
+      ]
+    : [];
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between bg-white dark:bg-gray-900 p-6 rounded-xl shadow">
-        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
-          Quản lý Hóa đơn
-        </h2>
-      </div>
-
+      <BoxOnView title="Tổng quan hóa đơn" fields={overviewFields} />
       <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md p-4 flex flex-col md:flex-row justify-between items-center gap-4">
         <SearchWithOptions
           searchField={searchField}
