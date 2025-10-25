@@ -26,7 +26,6 @@ const COLORS = [
   "#ef4444",
 ];
 
-
 const Dashboard = () => {
   const navigate = useNavigate();
 
@@ -34,7 +33,12 @@ const Dashboard = () => {
   const [revenueData, setRevenueData] = useState([]);
   const [usageData, setUsageData] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Bộ lọc doanh thu
   const [activeTab, setActiveTab] = useState("Năm");
+  const [selectedDate, setSelectedDate] = useState(""); // Tuần (yyyy-mm-dd)
+  const [selectedMonth, setSelectedMonth] = useState(""); // Tháng
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Năm
 
   // ======== GỌI API: TỔNG QUAN ========
   const fetchOverview = useCallback(async () => {
@@ -51,30 +55,28 @@ const Dashboard = () => {
   // ======== GỌI API: DOANH THU ========
   const fetchRevenue = useCallback(async () => {
     try {
-      const today = new Date().toISOString().split("T")[0];
+      setLoading(true);
       let res;
 
       if (activeTab === "Tuần") {
-        res = await statisticService.getDoanhthutuan(today);
+        if (!selectedDate) return alert("Vui lòng chọn ngày (yyyy-mm-dd)");
+        res = await statisticService.getDoanhthutuan(selectedDate);
       } else if (activeTab === "Tháng") {
-        const thang = new Date().getMonth() + 1;
-        const nam = new Date().getFullYear();
-        res = await statisticService.getDoanhthuthang(thang, nam);
+        if (!selectedMonth || !selectedYear)
+          return alert("Vui lòng nhập tháng và năm!");
+        res = await statisticService.getDoanhthuthang(selectedMonth, selectedYear);
       } else if (activeTab === "Năm") {
-        const nam = new Date().getFullYear();
-        res = await statisticService.getDoanhthunam(nam);
+        if (!selectedYear) return alert("Vui lòng nhập năm!");
+        res = await statisticService.getDoanhthunam(selectedYear);
       }
 
       const data = res?.data?.data || res?.data || {};
-
-      // 🔹 Ưu tiên chọn đúng trường chi tiết theo loại
       const raw =
         data.chiTietTheoNgay ||
         data.chiTietTheoTuan ||
         data.chiTietTheoQuy ||
         {};
 
-      // 🔹 Map về mảng [{ name, value }]
       const mapped = Object.entries(raw).map(([key, val]) => ({
         name: key,
         value: val,
@@ -83,8 +85,10 @@ const Dashboard = () => {
       setRevenueData(mapped);
     } catch (err) {
       console.error("❌ Lỗi tải biểu đồ doanh thu:", err);
+    } finally {
+      setLoading(false);
     }
-  }, [activeTab]);
+  }, [activeTab, selectedDate, selectedMonth, selectedYear]);
 
   // ======== GỌI API: TỶ LỆ SỬ DỤNG DỊCH VỤ ========
   const fetchUsageRate = useCallback(async () => {
@@ -111,11 +115,12 @@ const Dashboard = () => {
     fetchUsageRate();
   }, [fetchOverview, fetchUsageRate]);
 
-  useEffect(() => {
-    fetchRevenue();
-  }, [fetchRevenue]);
+  // // Mặc định hiển thị doanh thu năm hiện tại khi mở Dashboard
+  // useEffect(() => {
+  //   fetchRevenue();
+  // }, [fetchRevenue]);
 
-  // ======== BOX THỐNG KÊ ========
+  // ======== BOX TỔNG QUAN ========
   const overviewFields = overview
     ? [
         {
@@ -125,7 +130,7 @@ const Dashboard = () => {
           color: "text-orange-500",
           bg: "bg-gradient-to-r from-orange-100 via-orange-200 to-orange-300 dark:from-orange-900/40 dark:via-orange-800/40 dark:to-orange-700/40",
           border: "border-l-4 border-orange-400",
-          link : "/services",
+          link: "/services",
         },
         {
           label: "Tổng số Lượng tồn",
@@ -135,7 +140,6 @@ const Dashboard = () => {
           bg: "bg-gradient-to-r from-sky-100 via-sky-200 to-sky-300 dark:from-sky-900/40 dark:via-sky-800/40 dark:to-sky-700/40",
           border: "border-l-4 border-sky-400",
           link: "/services",
-
         },
         {
           label: "Tổng số Thợ",
@@ -144,7 +148,7 @@ const Dashboard = () => {
           color: "text-emerald-500",
           bg: "bg-gradient-to-r from-emerald-100 via-emerald-200 to-emerald-300 dark:from-emerald-900/40 dark:via-emerald-800/40 dark:to-emerald-700/40",
           border: "border-l-4 border-emerald-400",
-          link :"/machine",
+          link: "/machine",
         },
         {
           label: "Tổng số Loại dịch vụ",
@@ -153,7 +157,7 @@ const Dashboard = () => {
           color: "text-violet-500",
           bg: "bg-gradient-to-r from-violet-100 via-violet-200 to-violet-300 dark:from-violet-900/40 dark:via-violet-800/40 dark:to-violet-700/40",
           border: "border-l-4 border-violet-400",
-          link:"/service-types",
+          link: "/service-types",
         },
         {
           label: "Tổng số Khách hàng",
@@ -197,21 +201,75 @@ const Dashboard = () => {
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
               Thống kê Doanh thu
             </h3>
-            <div className="flex space-x-2">
-              {["Tuần", "Tháng", "Năm"].map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-3 py-1 rounded-md border text-sm font-medium ${
-                    activeTab === tab
-                      ? "bg-gray-800 text-white dark:bg-gray-200 dark:text-gray-900"
-                      : "bg-transparent border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
+
+            <div className="flex items-center gap-3">
+              {/* Tab chọn chế độ: Tuần / Tháng / Năm */}
+              <select
+                value={activeTab}
+                onChange={(e) => setActiveTab(e.target.value)}
+                className="border border-gray-300 dark:border-gray-600 rounded-lg py-1 px-2 
+                          bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm"
+              >
+                <option value="Tuần">Tuần</option>
+                <option value="Tháng">Tháng</option>
+                <option value="Năm">Năm</option>
+              </select>
+
+              {/* Input thay đổi theo lựa chọn */}
+              {activeTab === "Tuần" && (
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="border border-gray-300 dark:border-gray-600 rounded-lg py-1 px-2
+                            bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm"
+                />
+              )}
+
+              {activeTab === "Tháng" && (
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    min="1"
+                    max="12"
+                    placeholder="Tháng"
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(parseInt(e.target.value) || "")}
+                    className="w-20 border border-gray-300 dark:border-gray-600 rounded-lg py-1 px-2
+                              bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm"
+                  />
+                  <input
+                    type="number"
+                    min="2000"
+                    max={new Date().getFullYear()}
+                    placeholder="Năm"
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(parseInt(e.target.value) || "")}
+                    className="w-24 border border-gray-300 dark:border-gray-600 rounded-lg py-1 px-2
+                              bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm"
+                  />
+                </div>
+              )}
+
+              {activeTab === "Năm" && (
+                <input
+                  type="number"
+                  min="2000"
+                  max={new Date().getFullYear()}
+                  placeholder="Năm"
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(parseInt(e.target.value) || "")}
+                  className="w-24 border border-gray-300 dark:border-gray-600 rounded-lg py-1 px-2
+                            bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm"
+                />
+              )}
+
+              <button
+                onClick={fetchRevenue}
+                className="px-3 py-1.5 text-sm bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition"
+              >
+                Lọc
+              </button>
             </div>
           </div>
 
@@ -245,12 +303,9 @@ const Dashboard = () => {
 
         {/* ===== BIỂU ĐỒ TỶ LỆ ===== */}
         <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-md transition-colors duration-300">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-              Tỷ lệ sử dụng dịch vụ
-            </h3>
-          </div>
-
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
+            Tỷ lệ sử dụng dịch vụ
+          </h3>
           <div className="h-[340px]">
             {usageData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
