@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // ✅ 1. Import useNavigate
-import { useCart } from "../context/CartContext"; // ✅ 2. Import useCart
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { useCart } from "../context/CartContext";
 import OrderSidebar from "../components/layout/OrderSidebar";
 import ProductCard from "../components/common/ProductCard";
-import { Search } from "lucide-react";
+import { Search, ClipboardList, ChevronsLeft } from "lucide-react";
 import { serviceService } from "../services/serviceService";
 import { serviceTypeService } from "../services/serviceTypeService";
 import { formatCurrency } from "../utils/helpers";
 
 const SalesManagement = () => {
-  const navigate = useNavigate(); // ✅ 3. Khởi tạo navigate
-  const { addToCart } = useCart(); // ✅ 4. Lấy hàm addToCart từ context
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
   const [services, setServices] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("Tất cả");
@@ -18,7 +18,18 @@ const SalesManagement = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // ❌ 5. Xóa state giỏ hàng cục bộ: const [cart, setCart] = useState([]);
+  // State quản lý trạng thái đóng/mở của sidebar
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+  // State cho nút di chuyển
+  const [buttonPosition, setButtonPosition] = useState({
+    bottom: 24,
+    right: 24,
+  });
+  const [isDragging, setIsDragging] = useState(false);
+  const buttonRef = useRef(null);
+  const dragOffset = useRef({ x: 0, y: 0 });
 
   // Lấy danh sách Loại dịch vụ
   useEffect(() => {
@@ -36,12 +47,12 @@ const SalesManagement = () => {
     fetchCategories();
   }, []);
 
-  // Lấy danh sách Dịch vụ (Sản phẩm)
+  // Lấy danh sách Dịch vụ
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await serviceService.getAll(0, 1000); // Lấy nhiều để lọc client-side
+        const response = await serviceService.getAll(0, 1000);
         const list = response?.content || [];
 
         const mapped = list.map((item) => ({
@@ -49,15 +60,12 @@ const SalesManagement = () => {
           name: item.tenDichVu,
           category: item.tenLoaiDichVu,
           price: item.gia,
-          soLuongBan: item.soLuongBan, // ✅ THÊM SỐ LƯỢNG BÁN
-          moTa: item.moTa,
           soLuongTon: item.soLuongTon,
-          image: item.anhDichVuUrl, // Sử dụng Url
+          soLuongBan: item.soLuongBan,
+          moTa: item.moTa,
+          image: item.anhDichVuUrl,
           status: item.trangThai,
           time: item.thoiGianUocTinh,
-          // Thêm các trường khác từ API nếu cần cho trang chi tiết
-          moTa: item.moTa,
-          // ...
         }));
 
         setServices(mapped);
@@ -72,11 +80,61 @@ const SalesManagement = () => {
     fetchData();
   }, []);
 
-  // ❌ 6. Xóa các hàm xử lý giỏ hàng cục bộ: handleAddToCart, handleRemove, handleCheckout
+  // Xử lý kéo thả nút
+  const handleMouseDown = (e) => {
+    if (!buttonRef.current) return;
+    setIsDragging(true);
 
-  // ✅ 7. Cập nhật hàm xem chi tiết để điều hướng và truyền dữ liệu
+    const rect = buttonRef.current.getBoundingClientRect();
+    dragOffset.current = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    };
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging || !buttonRef.current) return;
+
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const buttonWidth = buttonRef.current.offsetWidth;
+    const buttonHeight = buttonRef.current.offsetHeight;
+
+    // Tính toán vị trí mới (từ góc dưới phải)
+    let newRight =
+      viewportWidth - e.clientX - (buttonWidth - dragOffset.current.x);
+    let newBottom =
+      viewportHeight - e.clientY - (buttonHeight - dragOffset.current.y);
+
+    // Giới hạn trong viewport
+    newRight = Math.max(
+      10,
+      Math.min(newRight, viewportWidth - buttonWidth - 10)
+    );
+    newBottom = Math.max(
+      10,
+      Math.min(newBottom, viewportHeight - buttonHeight - 10)
+    );
+
+    setButtonPosition({ bottom: newBottom, right: newRight });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+      return () => {
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
+      };
+    }
+  }, [isDragging]);
+
   const handleViewDetails = (product) => {
-    // Truyền dữ liệu qua `state` của navigate
     navigate(`/sales/services/${product.id}`, {
       state: { productData: product },
     });
@@ -84,7 +142,7 @@ const SalesManagement = () => {
 
   // LOGIC LỌC DỮ LIỆU
   const filteredServices = services.filter((s) => {
-    const isAvailable = s.status === "Còn hàng"; // Chỉ lấy "Còn hàng"
+    const isAvailable = s.status === "Còn hàng";
     const matchCategory =
       selectedCategory === "Tất cả" || s.category === selectedCategory;
     const matchSearch = (s.name || "")
@@ -94,14 +152,15 @@ const SalesManagement = () => {
   });
 
   return (
-    // Thêm h-screen và overflow-hidden để layout chiếm toàn màn hình và không bị cuộn
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden relative bg-gray-50 dark:bg-gray-800">
       {/* KHU VỰC SẢN PHẨM */}
-      {/* Thêm flex flex-col để các phần tử con sắp xếp theo chiều dọc */}
-      <div className="flex-1 p-6 bg-gray-50 dark:bg-gray-800 flex flex-col">
+      <div
+        className={`flex-1 p-6 flex flex-col transition-all duration-300 ease-in-out ${
+          isSidebarOpen ? "pr-[25rem]" : "pr-6"
+        }`}
+      >
         {/* Thanh tìm kiếm & lọc */}
-        {/* Thêm dark mode classes */}
-        <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-sm border dark:border-gray-700 mb-6">
+        <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-sm border dark:border-gray-700 mb-6 flex-shrink-0">
           <div className="relative mb-4">
             <Search
               className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
@@ -112,7 +171,7 @@ const SalesManagement = () => {
               placeholder="Tìm kiếm theo tên dịch vụ..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-12 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-400 outline-none bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100" // Thêm màu nền, text cho dark mode
+              className="w-full pl-12 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-400 outline-none bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100"
             />
           </div>
 
@@ -125,7 +184,7 @@ const SalesManagement = () => {
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                   selectedCategory === cat
                     ? "bg-orange-500 text-white shadow-md"
-                    : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-orange-100 dark:hover:bg-orange-900/30" // Thêm dark mode classes
+                    : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-orange-100 dark:hover:bg-orange-900/30"
                 }`}
               >
                 {cat}
@@ -140,11 +199,8 @@ const SalesManagement = () => {
           </div>
         )}
 
-        {/* Lưới sản phẩm (có thể cuộn) */}
-        {/* Thêm flex-1 và overflow-y-auto để phần này tự co giãn và cuộn được */}
-        <div className="flex-1 overflow-y-auto pr-2">
-          {" "}
-          {/* Thêm pr-2 để tránh thanh cuộn che nội dung */}
+        {/* Lưới sản phẩm */}
+        <div className="flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
           {loading ? (
             <p className="text-center text-gray-500 dark:text-gray-300 py-10">
               Đang tải dữ liệu...
@@ -156,8 +212,8 @@ const SalesManagement = () => {
                   <ProductCard
                     key={item.id}
                     item={{ ...item, priceText: formatCurrency(item.price) }}
-                    onAddToCart={addToCart} // ✅ 8. Dùng hàm từ context
-                    onViewDetails={handleViewDetails} // ✅ 9. Dùng hàm điều hướng mới
+                    onAddToCart={addToCart}
+                    onViewDetails={handleViewDetails}
                   />
                 ))
               ) : (
@@ -168,10 +224,45 @@ const SalesManagement = () => {
             </div>
           )}
         </div>
+
+        {/* NÚT MỞ SIDEBAR - DI CHUYỂN ĐƯỢC */}
+        {!isSidebarOpen && (
+          <button
+            ref={buttonRef}
+            onMouseDown={handleMouseDown}
+            onClick={(e) => {
+              // Chỉ toggle nếu không phải đang kéo
+              if (!isDragging) {
+                toggleSidebar();
+              }
+            }}
+            style={{
+              bottom: `${buttonPosition.bottom}px`,
+              right: `${buttonPosition.right}px`,
+            }}
+            className={`fixed z-30 flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-400 text-white px-4 py-3 rounded-full shadow-lg hover:from-orange-600 hover:to-orange-500 transition-all ${
+              isDragging
+                ? "cursor-grabbing scale-105"
+                : "cursor-grab hover:scale-105"
+            } active:scale-95`}
+            title="Kéo để di chuyển, Click để mở đơn hàng"
+          >
+            <ChevronsLeft size={20} />
+            <span className="font-semibold text-sm hidden sm:inline select-none">
+              Xem Đơn Hàng
+            </span>
+          </button>
+        )}
       </div>
 
-      {/* SIDEBAR ĐƠN HÀNG - Không cần truyền props nữa vì dùng context */}
-      <OrderSidebar />
+      {/* SIDEBAR ĐƠN HÀNG */}
+      <div
+        className={`fixed top-0 right-0 h-full z-40 transition-transform duration-300 ease-in-out ${
+          isSidebarOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <OrderSidebar isOpen={isSidebarOpen} onToggle={toggleSidebar} />
+      </div>
     </div>
   );
 };
