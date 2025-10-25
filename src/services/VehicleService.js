@@ -13,12 +13,7 @@ export const VehicleService = {
    * @param {string} sortDirection - 'asc' hoặc 'desc'
    * @returns {Promise<object>} - Trả về object chứa content, totalPages, etc.
    */
-  async getAll(
-    page = 0,
-    size = 10,
-    sortBy = "maXe",
-    sortDirection = "desc"
-  ) {
+  async getAll(page = 0, size = 10, sortBy = "maXe", sortDirection = "desc") {
     const response = await apiCall(
       `/api/xe/hienThiDanhSach?page=${page}&size=${size}&sortBy=${sortBy}&sortDirection=${sortDirection}`,
       { method: "GET" }
@@ -57,13 +52,13 @@ export const VehicleService = {
     if (searchCriteria.trangThai) {
       params.append("trangThai", searchCriteria.trangThai);
     }
+    if (searchCriteria.tenKhachHang) {
+      params.append("tenKhachHang", searchCriteria.tenKhachHang);
+    }
 
-    const response = await apiCall(
-      `/api/xe/timKiem?${params.toString()}`,
-      {
-        method: "GET",
-      }
-    );
+    const response = await apiCall(`/api/xe/timKiem?${params.toString()}`, {
+      method: "GET",
+    });
 
     return response;
   },

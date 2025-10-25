@@ -56,4 +56,17 @@ export const repairService = {
       }
     );
   },
+
+  /**
+   * Tạo mới một phiếu sửa chữa
+   * @param {object} data - Dữ liệu phiếu sửa chữa theo cấu trúc yêu cầu
+   * @returns {Promise<object>}
+   */
+  async create(data) {
+    return await apiCall("/api/phieusuachua/them", {
+      method: "POST",
+      data: data, // Gửi dưới dạng JSON
+      headers: { "Content-Type": "application/json" },
+    });
+  },
 };
