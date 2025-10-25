@@ -1,4 +1,3 @@
-// src/components/common/BoxOnView.jsx
 import React from "react";
 import {
   Package,
@@ -10,19 +9,18 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-
-// 🔹 Map icon name sang component Lucide tương ứng
 const iconMap = {
-  package: <Package size={28} strokeWidth={1.6} />,
-  layers: <Layers size={28} strokeWidth={1.6} />,
-  wrench: <Wrench size={28} strokeWidth={1.6} />,
-  "shopping-bag": <ShoppingBag size={28} strokeWidth={1.6} />,
-  users: <Users size={28} strokeWidth={1.6} />,
-  "file-text": <FileText size={28} strokeWidth={1.6} />,
+  package: Package,
+  layers: Layers,
+  wrench: Wrench,
+  "shopping-bag": ShoppingBag,
+  users: Users,
+  "file-text": FileText,
 };
 
 const BoxOnView = ({ title, fields = [] }) => {
   const navigate = useNavigate();
+
   return (
     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md p-6 transition-colors duration-300">
       {title && (
@@ -31,35 +29,41 @@ const BoxOnView = ({ title, fields = [] }) => {
         </h2>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {fields.map((item) => (
-          <div
-          key={item.label}
-className={`flex justify-between items-center p-5 rounded-xl 
-            shadow-sm hover:shadow-md transition-all duration-300
-            ${item.bg || ""} border border-transparent hover:scale-[1.02] transition ${item.bg} ${item.border}
-            dark:shadow-gray-900/30`}
-onClick={() => item.link && navigate(item.link)}
+      <div className="
+        grid gap-6
+        [grid-template-columns:repeat(auto-fit,minmax(0,1fr))]
+      ">
+        {fields.map((item, index) => {
+          const Icon = iconMap[item?.icon] || Package;
 
-          >
-            {/* ICON */}
+          return (
             <div
-              className={`p-3 rounded-lg bg-white/60 dark:bg-gray-900/40 ${item.color}`}
+              key={index}
+              onClick={() => item?.link && navigate(item.link)}
+              className={`cursor-pointer group
+                flex justify-between items-center gap-4 p-5 rounded-xl
+                shadow-sm hover:shadow-lg transition-all duration-300
+                border border-transparent hover:scale-[1.02]
+                ${item?.bg ?? "bg-gray-100 dark:bg-gray-800"}
+                ${item?.border ?? ""}
+              `}
             >
-              {iconMap[item.icon] || <Package size={24} />} {/* fallback */}
-            </div>
+              <div className={`p-3 rounded-lg bg-white/60 dark:bg-gray-900/40 
+                ${item?.color ?? "text-gray-600"}`}>
+                <Icon size={26} strokeWidth={1.6} />
+              </div>
 
-            {/* TEXT */}
-            <div className="text-right">
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                {item.label}
-              </h3>
-              <p className="text-2xl font-bold mt-1 text-gray-900 dark:text-gray-100">
-                {item.value?.toLocaleString("vi-VN") ?? "—"}
-              </p>
+              <div className="flex flex-col items-end">
+                <span className="text-xs font-medium text-gray-600 dark:text-gray-400 line-clamp-2">
+                  {item?.label ?? "Không rõ"}
+                </span>
+                <strong className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                  {item?.value?.toLocaleString("vi-VN") ?? "—"}
+                </strong>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

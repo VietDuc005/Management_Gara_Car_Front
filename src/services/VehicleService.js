@@ -96,4 +96,9 @@ export const VehicleService = {
       method: "DELETE",
     });
   },
+  async getThongKeXe() {
+    return await apiCall(`/api/xe/thongKeXe`, {
+      method: "GET",
+    });
+  },
 };
