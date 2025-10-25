@@ -26,7 +26,7 @@ const MachineManagement = () => {
   const [machine, setMachine] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [searchField, setSearchField] = useState("ngayVaoLam");
+  const [searchField, setSearchField] = useState("tenTho");
   const [searchTerm, setSearchTerm] = useState("");
   const [pagination, setPagination] = useState({
     page: 0,
