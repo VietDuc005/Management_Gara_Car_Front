@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "../context/ToastContext";
 import { serviceService } from "../services/serviceService";
 import Table from "../components/common/Table";
+import BoxOnView from "../components/common/BoxOnView";
 import SearchWithOptions from "../components/common/SearchBar";
 import SortControls from "../components/common/SortControls";
 import Pagination from "../components/common/Pagination";
@@ -29,6 +30,7 @@ const getStatusColor = (status) => {
 const ServiceManagement = () => {
   const { showToast } = useToast();
   const navigate = useNavigate();
+  const [overview, setOverview] = useState(null);
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -110,11 +112,22 @@ const ServiceManagement = () => {
     searchField,
     showToast,
   ]);
-
+ // ======== GỌI API: TỔNG QUAN ========
+    const fetchOverview = useCallback(async () => {
+      try {
+        const res = await serviceService.getThongKeDichVu();
+        setOverview(res.data || res);
+      } catch (err) {
+        console.error("❌ Lỗi khi tải tổng quan:", err);
+      }
+    }, []);
   useEffect(() => {
+    fetchOverview();
     fetchData();
-  }, [fetchData]);
+    
+  }, [fetchOverview,fetchData]);
 
+  
   // === EVENT HANDLERS ===
   const handleViewDetails = (row) =>
     navigate(`/services/${row.maDichVu}`, { state: { serviceData: row } });
@@ -221,15 +234,68 @@ const ServiceManagement = () => {
     { value: "tenDichVu", label: "Sắp xếp theo Tên" },
     { value: "gia", label: "Sắp xếp theo Giá" },
   ];
-
+ // ======== BOX TỔNG QUAN ========
+  const overviewFields = overview
+    ? [
+        {
+          label: "Tổng số Dịch vụ",
+          value: overview.totalDichVu,
+          icon: "package",
+          color: "text-orange-500",
+          bg: "bg-gradient-to-r from-orange-100 via-orange-200 to-orange-300 dark:from-orange-900/40 dark:via-orange-800/40 dark:to-orange-700/40",
+          border: "border-l-4 border-orange-400",
+      
+        },
+        {
+          label: "Số dịch vụ sắp hết",
+          value: overview.sapHet,
+          icon: "layers",
+          color: "text-sky-500",
+          bg: "bg-gradient-to-r from-sky-100 via-sky-200 to-sky-300 dark:from-sky-900/40 dark:via-sky-800/40 dark:to-sky-700/40",
+          border: "border-l-4 border-sky-400",
+          
+        },
+        {
+          label: "Số dịch vụ còn hàng",
+          value: overview.conHang,
+          icon: "wrench",
+          color: "text-emerald-500",
+          bg: "bg-gradient-to-r from-emerald-100 via-emerald-200 to-emerald-300 dark:from-emerald-900/40 dark:via-emerald-800/40 dark:to-emerald-700/40",
+          border: "border-l-4 border-emerald-400",
+          
+        },
+        {
+          label: "Số dịch vụ hết hàng",
+          value: overview.hetHang,
+          icon: "shopping-bag",
+          color: "text-violet-500",
+          bg: "bg-gradient-to-r from-violet-100 via-violet-200 to-violet-300 dark:from-violet-900/40 dark:via-violet-800/40 dark:to-violet-700/40",
+          border: "border-l-4 border-violet-400",
+          
+        },
+        {
+          label: "Số dịch vụ tồn",
+          value: overview.tongSoLuongTon,
+          icon: "users",
+          color: "text-rose-500",
+          bg: "bg-gradient-to-r from-rose-100 via-rose-200 to-rose-300 dark:from-rose-900/40 dark:via-rose-800/40 dark:to-rose-700/40",
+          border: "border-l-4 border-rose-400",
+        },
+        {
+          label: "Số dịch vụ tồn kho",
+          value: overview.tongGiaTriTonKho,
+          icon: "file-text",
+          color: "text-amber-500",
+          bg: "bg-gradient-to-r from-amber-100 via-amber-200 to-amber-300 dark:from-amber-900/40 dark:via-amber-800/40 dark:to-amber-700/40",
+          border: "border-l-4 border-amber-400",
+        
+        },
+      ]
+    : [];
   return (
     <div className="space-y-6 transition-colors duration-300">
-      <div className="flex items-center justify-between bg-white dark:bg-gray-900 p-6 rounded-xl shadow">
-        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
-          Quản lý Dịch vụ
-        </h2>
-       
-      </div>
+  <BoxOnView title="Tổng quan hệ thống" fields={overviewFields} />
+
       <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md p-4 flex flex-col sm:flex-row flex-wrap gap-4 justify-between items-center">
         <div className="w-full sm:w-auto flex-1 min-w-[250px]">
         <SearchWithOptions 
