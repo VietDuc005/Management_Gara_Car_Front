@@ -294,7 +294,7 @@ const ServiceManagement = () => {
     : [];
   return (
     <div className="space-y-6 transition-colors duration-300">
-  <BoxOnView title="Tổng quan hệ thống" fields={overviewFields} />
+  <BoxOnView title="Tổng quan dịch vụ" fields={overviewFields} />
 
       <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md p-4 flex flex-col sm:flex-row flex-wrap gap-4 justify-between items-center">
         <div className="w-full sm:w-auto flex-1 min-w-[250px]">
