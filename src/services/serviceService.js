@@ -106,4 +106,8 @@ export const serviceService = {
       method: "DELETE",
     });
   },
+   async getThongKeDichVu() {
+    return await apiCall(`/api/dichvu/thongKe`, { method: "GET" });
+  },
+
 };
