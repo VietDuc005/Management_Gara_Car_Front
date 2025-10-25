@@ -48,6 +48,9 @@ export const machineService = {
     if (searchCriteria.trangThai) {
       params.append("trangThai", searchCriteria.trangThai);
     }
+    if (searchCriteria.soDienThoai) {
+      params.append("soDienThoai", searchCriteria.soDienThoai);
+    }
     if (searchCriteria.kinhNghiem) {
       params.append("kinhNghiem", searchCriteria.kinhNghiem);
     }
