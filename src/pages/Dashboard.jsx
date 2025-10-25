@@ -1,6 +1,9 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import BoxOnView from "../components/common/BoxOnView";
+import Table from "../components/common/Table";
+import { useToast } from "../context/ToastContext";
+
 import {
   BarChart,
   Bar,
@@ -28,11 +31,13 @@ const COLORS = [
 
 const Dashboard = () => {
   const navigate = useNavigate();
+const { showToast } = useToast();
 
   const [overview, setOverview] = useState(null);
   const [revenueData, setRevenueData] = useState([]);
   const [usageData, setUsageData] = useState([]);
   const [loading, setLoading] = useState(true);
+const [topServices, setTopServices] = useState([]);
 
   // Bộ lọc doanh thu
   const [activeTab, setActiveTab] = useState("Năm");
@@ -108,12 +113,33 @@ const Dashboard = () => {
       setUsageData([]);
     }
   }, []);
+  // ======== GỌI API: TOP 5 DỊCH VỤ ========
+const fetchTopServices = useCallback(async () => {
+  try {
+    const res = await statisticService.getTopDichVu();
+    const raw = res?.data?.data || res?.data || [];
+
+    const mapped = raw.map((item, index) => ({
+      id: index + 1,
+      tenDichVu: item.tenDichVu,
+      soLuongSuDung: item.soLuongSuDung,
+      doanhThu: item.doanhThu,
+    }));
+
+    setTopServices(mapped);
+  } catch (err) {
+    showToast("Không thể tải Top dịch vụ!", "error");
+  }
+}, [showToast]);
+
 
   // ======== useEffect ========
-  useEffect(() => {
-    fetchOverview();
-    fetchUsageRate();
-  }, [fetchOverview, fetchUsageRate]);
+ useEffect(() => {
+  fetchOverview();
+  fetchUsageRate();
+  fetchTopServices();
+}, [fetchOverview, fetchUsageRate, fetchTopServices]);
+
 
   // // Mặc định hiển thị doanh thu năm hiện tại khi mở Dashboard
   // useEffect(() => {
@@ -179,6 +205,19 @@ const Dashboard = () => {
         },
       ]
     : [];
+    
+    const topColumns = [
+  { key: "stt", label: "STT" },
+  { key: "tenDichVu", label: "Tên dịch vụ" },
+  {
+    key: "soLuongSuDung",
+    label: "Số lần sử dụng",
+    render: (v) => (
+      <span className="font-semibold text-orange-600">{v}</span>
+    ),
+  },
+];
+
 
   // ======== HIỂN THỊ UI ========
   if (loading)
@@ -363,7 +402,63 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+    {/* ===== BẢNG TOP 5 DỊCH VỤ (NEW DESIGN) ===== */}
+<div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-md transition-colors duration-300">
+  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
+    Top 5 dịch vụ được sử dụng nhiều nhất
+  </h3>
+
+  <div className="space-y-3">
+    {topServices.slice(0, 5).map((item, index) => {
+      const rank = index + 1;
+
+      const rankStyle = {
+        1: "bg-gradient-to-r from-yellow-300 to-yellow-500 text-yellow-900",
+        2: "bg-gradient-to-r from-gray-300 to-gray-400 text-gray-900",
+        3: "bg-gradient-to-r from-amber-700 to-amber-900 text-amber-100",
+      };
+
+      const medals = {
+        1: "🥇",
+        2: "🥈",
+        3: "🥉",
+      };
+
+      return (
+        <div
+          key={index}
+          className="flex justify-between items-center p-4 rounded-lg 
+            border dark:border-gray-700 shadow-sm hover:shadow-md 
+            transition cursor-pointer hover:scale-[1.01]"
+        >
+          {/* Left */}
+          <div className="flex items-center gap-3">
+            <span
+              className={`w-8 h-8 flex items-center justify-center rounded-full font-bold
+                ${rank <= 3 ? rankStyle[rank] : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"}
+              `}
+            >
+              {rank <= 3 ? medals[rank] : rank}
+            </span>
+
+            <span className="font-medium text-gray-700 dark:text-gray-200">
+              {item.tenDichVu}
+            </span>
+          </div>
+
+          {/* Right */}
+          <span className="text-sm font-semibold text-orange-600">
+            {item.soLuongSuDung} lần
+          </span>
+        </div>
+      );
+    })}
+  </div>
+</div>
+
+
     </div>
+    
   );
 };
 

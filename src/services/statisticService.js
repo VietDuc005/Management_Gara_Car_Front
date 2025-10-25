@@ -36,4 +36,8 @@ export const statisticService = {
       method: "GET",
     });
   },
+
+  async getTopDichVu() {
+    return await apiCall(`/api/thongke/top-5-dich-vu`, { method: "GET" });
+  },
 };
