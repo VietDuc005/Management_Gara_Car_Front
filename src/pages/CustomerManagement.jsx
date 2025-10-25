@@ -103,7 +103,7 @@ const [overview, setOverview] = useState(null);
  // ======== GỌI API: TỔNG QUAN ========
    const fetchOverview = useCallback(async () => {
      try {
-       const res = await customerService.getthongkeKhachHang();
+       const res = await customerService.getThongKeKhachHang();
        setOverview(res.data || res);
      } catch (err) {
        console.error("❌ Lỗi khi tải tổng quan:", err);
@@ -178,7 +178,7 @@ const [overview, setOverview] = useState(null);
     ? [
         {
           label: "Tổng số Khách hàng",
-          value: overview.countKhachHang,
+          value: overview.tongSoKhachHang,
           icon: "package",
           color: "text-orange-500",
           bg: "bg-gradient-to-r from-orange-100 via-orange-200 to-orange-300 dark:from-orange-900/40 dark:via-orange-800/40 dark:to-orange-700/40",
@@ -186,8 +186,8 @@ const [overview, setOverview] = useState(null);
           
         },
         {
-          label: "Số khách hàng đang hoạt động",
-          
+          label: "Số khách hàng doanh nghiep",
+          value: overview.soKhachHangDoanhNghiep,
           icon: "layers",
           color: "text-sky-500",
           bg: "bg-gradient-to-r from-sky-100 via-sky-200 to-sky-300 dark:from-sky-900/40 dark:via-sky-800/40 dark:to-sky-700/40",
@@ -196,7 +196,7 @@ const [overview, setOverview] = useState(null);
         },
         {
           label: "Sô khách hàng doanh nghiệp",
-          
+          value: overview.soKhachHangCaNhan,
           icon: "wrench",
           color: "text-emerald-500",
           bg: "bg-gradient-to-r from-emerald-100 via-emerald-200 to-emerald-300 dark:from-emerald-900/40 dark:via-emerald-800/40 dark:to-emerald-700/40",
