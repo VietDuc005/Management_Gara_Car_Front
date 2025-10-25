@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useToast } from "../context/ToastContext";
 import Table from "../components/common/Table";
+import BoxOnView from "../components/common/BoxOnView";
 import SearchWithOptions from "../components/common/SearchBar";
 import SortControls from "../components/common/SortControls";
 import Pagination from "../components/common/Pagination";
@@ -25,7 +26,7 @@ const CustomerManagement = () => {
   const { showToast } = useToast();
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
-
+const [overview, setOverview] = useState(null);
   const [searchField, setSearchField] = useState("tenKhachHang");
   const [searchTerm, setSearchTerm] = useState("");
   const [pagination, setPagination] = useState({
@@ -99,7 +100,22 @@ const CustomerManagement = () => {
     searchField,
     showToast,
   ]);
-
+ // ======== GỌI API: TỔNG QUAN ========
+   const fetchOverview = useCallback(async () => {
+     try {
+       const res = await customerService.getthongkeKhachHang();
+       setOverview(res.data || res);
+     } catch (err) {
+       console.error("❌ Lỗi khi tải tổng quan:", err);
+     } finally {
+       setLoading(false);
+     }
+   }, []);
+   // ======== useEffect ========
+     useEffect(() => {
+       fetchOverview();
+       
+     }, [fetchOverview]);
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
@@ -158,7 +174,38 @@ const CustomerManagement = () => {
       showToast(err.message, "error");
     }
   };
-
+  const overviewFields = overview
+    ? [
+        {
+          label: "Tổng số Khách hàng",
+          value: overview.countKhachHang,
+          icon: "package",
+          color: "text-orange-500",
+          bg: "bg-gradient-to-r from-orange-100 via-orange-200 to-orange-300 dark:from-orange-900/40 dark:via-orange-800/40 dark:to-orange-700/40",
+          border: "border-l-4 border-orange-400",
+          
+        },
+        {
+          label: "Số khách hàng đang hoạt động",
+          
+          icon: "layers",
+          color: "text-sky-500",
+          bg: "bg-gradient-to-r from-sky-100 via-sky-200 to-sky-300 dark:from-sky-900/40 dark:via-sky-800/40 dark:to-sky-700/40",
+          border: "border-l-4 border-sky-400",
+          
+        },
+        {
+          label: "Sô khách hàng doanh nghiệp",
+          
+          icon: "wrench",
+          color: "text-emerald-500",
+          bg: "bg-gradient-to-r from-emerald-100 via-emerald-200 to-emerald-300 dark:from-emerald-900/40 dark:via-emerald-800/40 dark:to-emerald-700/40",
+          border: "border-l-4 border-emerald-400",
+          
+        },
+        
+      ]
+    : [];
   const customerFormFields = [
     {
       name: "tenKhachHang",
@@ -232,13 +279,8 @@ const CustomerManagement = () => {
 
   return (
     <div className="space-y-6 transition-colors duration-300">
-      <div className="flex items-center justify-between bg-white dark:bg-gray-900 p-6 rounded-xl shadow transition-colors duration-300">
-  <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
-    Quản lý Khách hàng
-  </h2>
+      <BoxOnView title="Tổng quan khách hàng" fields={overviewFields} />
 
-       
-      </div>
       <div
   className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md 
              flex flex-col sm:flex-row flex-wrap gap-4 justify-between 
@@ -252,7 +294,7 @@ const CustomerManagement = () => {
       onSearchFieldChange={setSearchField}
       onSearchTermChange={setSearchTerm}
       options={searchOptions}
-      placeholder="🔍 Nhập giá trị cần tìm..."
+      placeholder=" Nhập giá trị cần tìm..."
     />
   </div>
 
