@@ -7,6 +7,7 @@ import { AuthContext } from "../../context/AuthContext";
 
 // Ánh xạ đường dẫn sang tiêu đề trang
 const pageTitles = {
+ 
   "/dashboard": "Trang chủ",
   "/invoice": "Quản lý Hóa đơn",
   "/service-types": "Quản lý Loại Dịch vụ",
@@ -16,6 +17,7 @@ const pageTitles = {
   "/services": "Quản lý Dịch vụ",
   "/vehicles": "Quản lý Phương tiện",
   "/sales": "Quản lý Bán hàng",
+   "/auth" : "Quản lí tài khoản",
 };
 
 const Layout = () => {
