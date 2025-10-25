@@ -101,8 +101,8 @@ export const customerService = {
       method: "DELETE",
     });
   },
-  async getthongkeKhachHang() {
-    return await apiCall(`/api/khachhang/count`, { method: "GET" });
+  async getThongKeKhachHang() {
+    return await apiCall(`/api/khachhang/tinhtongkhachhangtheoloai`, { method: "GET" });
   },
 
 };
