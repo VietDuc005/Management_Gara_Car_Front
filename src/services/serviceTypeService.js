@@ -93,4 +93,8 @@ export const serviceTypeService = {
       method: "DELETE",
     });
   },
-};
+  async getthongkeLoaiDichVu(
+  ) {
+    return await apiCall(`/api/loaidichvu/thongKeLoaiDichVu`, { method: "GET" });
+},
+}
