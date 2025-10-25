@@ -5,6 +5,7 @@ import SearchWithOptions from "../components/common/SearchBar";
 import SortControls from "../components/common/SortControls";
 import Pagination from "../components/common/Pagination";
 import Box from "../components/common/Box";
+import BoxOnView from "../components/common/BoxOnView";
 import ConfirmModal from "../components/common/ConfirmModal";
 import { serviceTypeService } from "../services/serviceTypeService";
 import { formatDate } from "../utils/helpers";
@@ -23,6 +24,7 @@ const getStatusColor = (status) => {
 
 const ServiceTypeManagement = () => {
   const { showToast } = useToast();
+  const [overview, setOverview] = useState(null);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchField, setSearchField] = useState("tenLoai");
@@ -42,7 +44,17 @@ const ServiceTypeManagement = () => {
   const [editingData, setEditingData] = useState(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
-
+ 
+  const fetchOverview = useCallback(async () => {
+      try {
+        const res = await serviceTypeService.getthongkeLoaiDichVu();
+        setOverview(res.data || res);
+      } catch (err) {
+        console.error("❌ Lỗi khi tải tổng quan:", err);
+      } finally {
+        setLoading(false);
+      }
+    }, []);
   // === FETCH DATA ===
   const fetchData = useCallback(async () => {
     try {
@@ -104,6 +116,10 @@ const ServiceTypeManagement = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+  // ======== useEffect ========
+    useEffect(() => {
+      fetchOverview();
+    }, [fetchOverview]);
 
   // === CRUD HANDLERS ===
   const handleCreateNew = () => {
@@ -162,6 +178,35 @@ const ServiceTypeManagement = () => {
     }
   };
 
+  const overviewFields = overview
+    ? [
+        {
+          label: "Tổng số Dịch vụ",
+          value: overview.tongSoLoaiDichVu,
+          icon: "package",
+          color: "text-orange-500",
+          bg: "bg-gradient-to-r from-orange-100 via-orange-200 to-orange-300 dark:from-orange-900/40 dark:via-orange-800/40 dark:to-orange-700/40",
+          border: "border-l-4 border-orange-400",
+        },
+        {
+          label: "Tổng số Lượng tồn",
+          value: overview.soLoaiDichVuHoatDong,
+          icon: "layers",
+          color: "text-sky-500",
+          bg: "bg-gradient-to-r from-sky-100 via-sky-200 to-sky-300 dark:from-sky-900/40 dark:via-sky-800/40 dark:to-sky-700/40",
+          border: "border-l-4 border-sky-400",
+        },
+        {
+          label: "Tổng số Lượng tồn",
+          value: overview.soloaiDichVuMoiThangQua,
+          icon: "layers",
+          color: "text-sky-500",
+          bg: "bg-gradient-to-r from-sky-100 via-sky-200 to-sky-300 dark:from-sky-900/40 dark:via-sky-800/40 dark:to-sky-700/40",
+          border: "border-l-4 border-sky-400",
+        },
+      ]
+    : [];
+ 
   // === CONFIG ===
   const createServiceTypeFields = [
     {
@@ -217,12 +262,7 @@ const ServiceTypeManagement = () => {
   return (
     <div className="space-y-6 transition-colors duration-300">
       {/* Header box */}
-      <div className="flex items-center justify-between bg-white dark:bg-gray-900 p-6 rounded-xl shadow transition-colors duration-300">
-        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
-          Quản lý Loại Dịch vụ
-        </h2>
-        
-      </div>
+      <BoxOnView title="Tổng quan hệ thống" fields={overviewFields} />
 
       {/* Search + Sort */}
       <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md p-4 flex flex-col sm:flex-row flex-wrap gap-4 justify-between items-center
