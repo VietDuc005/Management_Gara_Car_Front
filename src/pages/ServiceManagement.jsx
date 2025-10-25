@@ -282,7 +282,7 @@ const ServiceManagement = () => {
           border: "border-l-4 border-rose-400",
         },
         {
-          label: "Số dịch vụ tồn kho",
+          label: "Giá trị số dịch vụ tồn kho",
           value: overview.tongGiaTriTonKho,
           icon: "file-text",
           color: "text-amber-500",

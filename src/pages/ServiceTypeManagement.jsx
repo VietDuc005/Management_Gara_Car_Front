@@ -197,7 +197,7 @@ const ServiceTypeManagement = () => {
           border: "border-l-4 border-sky-400",
         },
         {
-          label: "Tổng số Lượng tồn",
+          label: "Số loại dịch vụ mới ",
           value: overview.soloaiDichVuMoiThangQua,
           icon: "layers",
           color: "text-sky-500",
