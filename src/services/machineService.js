@@ -97,4 +97,9 @@ export const machineService = {
       method: "DELETE",
     });
   },
+  async getthongkeTho(){
+return await apiCall(`/api/tho/thongKe`,{
+  method:"GET",
+}
+  )},
 };
