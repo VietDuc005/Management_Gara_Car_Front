@@ -7,6 +7,7 @@ import SearchWithOptions from "../components/common/SearchBar";
 import SortControls from "../components/common/SortControls";
 import Pagination from "../components/common/Pagination";
 import Box from "../components/common/Box";
+import BoxOnView from "../components/common/BoxOnView";
 import ConfirmModal from "../components/common/ConfirmModal";
 import { Plus } from "lucide-react";
 
@@ -24,6 +25,7 @@ const getStatusColor = (status) => {
 
 const VehicleManagement = () => {
   const { showToast } = useToast();
+  const [overview, setOverview] = useState(null);
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -124,10 +126,23 @@ const VehicleManagement = () => {
     searchField,
     showToast,
   ]);
+// ======== GỌI API: TỔNG QUAN ========
+  const fetchOverview = useCallback(async () => {
+    try {
+      const res = await VehicleService.getThongKeXe();
+      setOverview(res.data || res);
+    } catch (err) {
+      console.error("❌ Lỗi khi tải tổng quan:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
+    fetchOverview();
     fetchData();
-  }, [fetchData]);
+    
+  }, [fetchOverview, fetchData]);
 
   // ========== CRUD ==========
   const handleCreateNew = () => {
@@ -243,16 +258,33 @@ const VehicleManagement = () => {
     { key: "tenKhachHang", label: "Tên Khách Hàng" },
     { key: "maKhachHang", label: "Mã Khách Hàng" },
   ];
+  const overviewFields = overview
+    ? [
+        {
+          label: "Tổng số Xe",
+          value: overview.tongSoXe,
+          icon: "package",
+          color: "text-orange-500",
+          bg: "bg-gradient-to-r from-orange-100 via-orange-200 to-orange-300 dark:from-orange-900/40 dark:via-orange-800/40 dark:to-orange-700/40",
+          border: "border-l-4 border-orange-400",
+        },
+        {
+          label: "Tổng số xe hoạt động",
+          value: overview.soxeHoatDong,
+          icon: "layers",
+          color: "text-sky-500",
+          bg: "bg-gradient-to-r from-sky-100 via-sky-200 to-sky-300 dark:from-sky-900/40 dark:via-sky-800/40 dark:to-sky-700/40",
+          border: "border-l-4 border-sky-400",
+        },
+        
+      ]
+    : [];
 
   // ========== UI ==========
   return (
     <div className="space-y-6 transition-colors duration-300">
       {/* Header */}
-      <div className="flex items-center justify-between bg-white dark:bg-gray-900 p-6 rounded-xl shadow transition-colors duration-300">
-        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
-          Quản lý Xe
-        </h2>
-      </div>
+      <BoxOnView title="Tổng quan Xe" fields={overviewFields} />
 
       {/* Search & Sort */}
       <div
