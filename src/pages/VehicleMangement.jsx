@@ -85,7 +85,10 @@ const VehicleManagement = () => {
       console.log("🚗 API xe trả về:", responseData);
 
       // Hỗ trợ mọi kiểu dữ liệu backend trả
-      if (responseData?.data?.content && Array.isArray(responseData.data.content)) {
+      if (
+        responseData?.data?.content &&
+        Array.isArray(responseData.data.content)
+      ) {
         setVehicles(
           responseData.data.content.map((x) => ({ ...x, id: x.maXe }))
         );
@@ -181,6 +184,12 @@ const VehicleManagement = () => {
     { name: "dongXe", label: "Dòng Xe", type: "text" },
     { name: "namSanXuat", label: "Năm Sản Xuất", type: "number" },
     { name: "mauSac", label: "Màu Sắc", type: "text" },
+    {
+      name: "tenKhachHang",
+      label: "Tên Khách Hàng",
+      type: "text",
+      required: true,
+    },
     { name: "maKhachHang", label: "Mã Khách Hàng", type: "number" },
   ];
 
@@ -207,6 +216,7 @@ const VehicleManagement = () => {
     { value: "namSanXuat", label: "Tìm theo Năm Sản Xuất" },
     { value: "mauSac", label: "Tìm theo Màu Sắc" },
     { value: "trangThai", label: "Tìm theo Trạng Thái" },
+    { value: "tenKhachHang", label: "Tìm theo Tên Khách" },
   ];
 
   // ========== TABLE ==========
@@ -230,6 +240,7 @@ const VehicleManagement = () => {
         </span>
       ),
     },
+    { key: "tenKhachHang", label: "Tên Khách Hàng" },
     { key: "maKhachHang", label: "Mã Khách Hàng" },
   ];
 
@@ -241,30 +252,30 @@ const VehicleManagement = () => {
         <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
           Quản lý Xe
         </h2>
-       
       </div>
 
       {/* Search & Sort */}
-      <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md flex flex-col sm:flex-row flex-wrap gap-4 justify-between items-center
- transition-colors duration-300">
-  <div className="w-full sm:w-auto flex-1 min-w-[250px]">
-   <SearchWithOptions
-          searchField={searchField}
-          searchTerm={searchTerm}
-          onSearchFieldChange={setSearchField}
-          onSearchTermChange={setSearchTerm}
-          options={searchOptions}
-          placeholder="Nhập giá trị tìm kiếm..."
-        />
-</div>
+      <div
+        className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md flex flex-col sm:flex-row flex-wrap gap-4 justify-between items-center
+ transition-colors duration-300"
+      >
+        <div className="w-full sm:w-auto flex-1 min-w-[250px]">
+          <SearchWithOptions
+            searchField={searchField}
+            searchTerm={searchTerm}
+            onSearchFieldChange={setSearchField}
+            onSearchTermChange={setSearchTerm}
+            options={searchOptions}
+            placeholder="Nhập giá trị tìm kiếm..."
+          />
+        </div>
 
-       
         <SortControls
           sortConfig={sortConfig}
           onSortChange={setSortConfig}
           options={sortOptions}
         />
-         <button
+        <button
           onClick={handleCreateNew}
           className="w-full sm:w-auto justify-center active:scale-95 shadow-sm
  flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition"
@@ -315,10 +326,7 @@ const VehicleManagement = () => {
       >
         <p>
           Bạn có chắc chắn muốn xóa xe{" "}
-          <strong className="text-red-600">
-            "{itemToDelete?.bienSo}"
-          </strong>
-          ?
+          <strong className="text-red-600">"{itemToDelete?.bienSo}"</strong>?
         </p>
       </ConfirmModal>
     </div>

@@ -8,14 +8,14 @@ import { AuthContext } from "../../context/AuthContext";
 // Ánh xạ đường dẫn sang tiêu đề trang
 const pageTitles = {
   "/dashboard": "Trang chủ",
-  "/invoice" : "Hóa đơn",
+  "/invoice": "Quản lý Hóa đơn",
   "/service-types": "Quản lý Loại Dịch vụ",
   "/customers": "Quản lý Khách hàng",
   "/machine": "Quản lý Thợ",
   "/repairs": "Quản lý Phiếu sửa chữa",
   "/services": "Quản lý Dịch vụ",
   "/vehicles": "Quản lý Phương tiện",
-  "/invoices": "Quản lý Hóa đơn",
+  "/sales": "Quản lý Bán hàng",
 };
 
 const Layout = () => {

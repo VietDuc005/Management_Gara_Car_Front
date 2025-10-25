@@ -54,12 +54,9 @@ export const machineService = {
     if (searchCriteria.chuyenMon) {
       params.append("chuyenMon", searchCriteria.chuyenMon);
     }
-    const response = await apiCall(
-      `/api/tho/timKiem?${params.toString()}`,
-      {
-        method: "GET",
-      }
-    );
+    const response = await apiCall(`/api/tho/timKiem?${params.toString()}`, {
+      method: "GET",
+    });
 
     return response;
   },

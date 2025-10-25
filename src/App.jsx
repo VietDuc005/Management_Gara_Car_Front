@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastContext";
+import { CartProvider } from "./context/CartContext"; // ✅ 1. Import CartProvider
 
 // Auth components
 import Login from "./components/auth/Login";
@@ -23,11 +24,10 @@ import CustomerManagement from "./pages/CustomerManagement";
 import MachineManagement from "./pages/MachineManagement";
 import ServiceManagement from "./pages/ServiceManagement";
 import ServiceDetail from "./pages/ServiceDetail";
-// Corrected import
-import VehicleManagement from "./pages/VehicleMangement";
-import InvoiceManagement from "./pages/InvoiceManagement";
+import SalesManagement from "./pages/SalesManagement";
+import VehicleManagement from "./pages/VehicleMangement"; // Giữ nguyên tên file sai
 import RepairManagement from "./pages/RepairManagement";
-// Thêm các trang khác vào đây khi bạn phát triển
+import ServiceSalesDetail from "./pages/ServiceSalesDetail"; // ✅ 2. Import trang chi tiết mới
 
 // ===================== ProtectedRoute Component =====================
 const ProtectedRoute = ({ requireAdmin = false }) => {
@@ -56,40 +56,45 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <ToastProvider>
-          <Routes>
-            <Route path="/login" element={<Login />} />
+          <CartProvider>
+            {" "}
+            {/* ✅ 3. Bọc ứng dụng trong CartProvider */}
+            <Routes>
+              <Route path="/login" element={<Login />} />
 
-            {/* --- Protected routes --- */}
-            <Route element={<ProtectedRoute />}>
-              {/* Layout sẽ là route cha, chứa Sidebar và Header */}
-              <Route path="/" element={<Layout />}>
-                {/* Trang mặc định sẽ là service-types */}
-                <Route
-                  index
-                  element={<Navigate to="/dashboard" replace />}
-                />
-
-                {/* Định nghĩa các trang con */}
-                <Route path="dashboard" element={<Dashboard />} />
-                <Route path="invoice" element={<InvoiceManagement />} />
-                <Route
-                  path="service-types"
-                  element={<ServiceTypeManagement />}
-                />
-                <Route path="customers" element={<CustomerManagement />} />
-                <Route path="machine" element={<MachineManagement />} />
-                <Route path="repairs" element={<RepairManagement />} />
-                <Route path="services" element={<ServiceManagement />} />
-                <Route path="services/:id" element={<ServiceDetail />} />
-                <Route path="vehicles" element={<VehicleManagement />} />
-                <Route path="invoices" element={<InvoiceManagement />} />
-                {/* Thêm các route khác vào đây khi bạn phát triển */}
+              {/* --- Protected routes --- */}
+              <Route element={<ProtectedRoute />}>
+                {/* Layout sẽ là route cha, chứa Sidebar và Header */}
+                <Route path="/" element={<Layout />}>
+                  {/* Trang mặc định */}
+                  <Route index element={<Navigate to="/dashboard" replace />} />
+                  {/* Định nghĩa các trang con */}
+                  <Route path="dashboard" element={<Dashboard />} />
+                  <Route path="invoice" element={<InvoiceManagement />} />{" "}
+                  {/* Sửa lại path */}
+                  <Route
+                    path="service-types"
+                    element={<ServiceTypeManagement />}
+                  />
+                  <Route path="customers" element={<CustomerManagement />} />
+                  <Route path="machine" element={<MachineManagement />} />
+                  <Route path="repairs" element={<RepairManagement />} />
+                  <Route path="services" element={<ServiceManagement />} />
+                  <Route path="services/:id" element={<ServiceDetail />} />
+                  <Route path="vehicles" element={<VehicleManagement />} />
+                  <Route path="sales" element={<SalesManagement />} />
+                  {/* ✅ 4. Thêm route cho trang chi tiết bán hàng */}
+                  <Route
+                    path="sales/services/:id"
+                    element={<ServiceSalesDetail />}
+                  />
+                </Route>
               </Route>
-            </Route>
 
-            {/* Fallback Route */}
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </Routes>
+              {/* Fallback Route */}
+              <Route path="*" element={<Navigate to="/login" replace />} />
+            </Routes>
+          </CartProvider>
         </ToastProvider>
       </AuthProvider>
     </BrowserRouter>
