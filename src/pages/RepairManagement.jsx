@@ -237,6 +237,7 @@ const RepairManagement = () => {
           onSearchFieldChange={setSearchField}
           onSearchTermChange={setSearchTerm}
           placeholder="Nhập giá trị tìm kiếm..."
+          module = "repair"
         />
 </div>
 

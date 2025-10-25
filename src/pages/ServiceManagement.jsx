@@ -233,14 +233,13 @@ const ServiceManagement = () => {
       <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md p-4 flex flex-col sm:flex-row flex-wrap gap-4 justify-between items-center">
         <div className="w-full sm:w-auto flex-1 min-w-[250px]">
         <SearchWithOptions 
-          {...{
-            searchField,
-            searchTerm,
-            options: searchOptions,
-            onSearchFieldChange: setSearchField,
-            onSearchTermChange: setSearchTerm,
-            placeholder: "Nhập tên hoặc loại dịch vụ...",
-          }}
+          searchField={searchField}
+          searchTerm={searchTerm}
+          onSearchFieldChange={setSearchField}
+          onSearchTermChange={setSearchTerm}
+          options={searchOptions}
+          placeholder="Nhập giá trị cần tìm..."
+         module = "service"
         />
         </div>
         <SortControls
