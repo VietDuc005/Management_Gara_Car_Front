@@ -1,3 +1,5 @@
+// src/pages/AuthManagement.jsx
+
 import React, { useState, useEffect, useCallback } from "react";
 import { authService } from "../services/authService";
 import { useToast } from "../context/ToastContext";
@@ -7,7 +9,7 @@ import SortControls from "../components/common/SortControls";
 import Pagination from "../components/common/Pagination";
 import Box from "../components/common/Box";
 import BoxOnView from "../components/common/BoxOnView";
-import { Plus, Eye } from "lucide-react";
+import { Plus } from "lucide-react"; // Bỏ icon "Eye"
 import { useAuth } from "../context/AuthContext";
 import { formatDate } from "../utils/helpers";
 import Loading from "../components/common/Loading";
@@ -37,9 +39,7 @@ const AuthManagement = () => {
 
   const [selected, setSelected] = useState(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [changePwModal, setChangePwModal] = useState(false);
-
-  const isMyAccount = selected?.tenDangNhap === user?.tenDangNhap;
+  // Đã xóa state 'changePwModal'
 
   // Debounce Search
   useEffect(() => {
@@ -89,7 +89,14 @@ const AuthManagement = () => {
     } finally {
       setLoading(false);
     }
-  }, [debounced, searchField, pagination.page, pagination.size, sortConfig]);
+  }, [
+    debounced,
+    searchField,
+    pagination.page,
+    pagination.size,
+    sortConfig,
+    showToast,
+  ]);
 
   useEffect(() => {
     fetchOverview();
@@ -100,9 +107,10 @@ const AuthManagement = () => {
   const onCreateAccount = async (form) => {
     try {
       await authService.register(form);
-      showToast("✅ Tạo tài khoản thành công!");
+      showToast("Tạo tài khoản thành công!");
       setIsEditOpen(false);
       fetchData();
+      fetchOverview();
     } catch (err) {
       showToast(err.message, "error");
     }
@@ -110,24 +118,19 @@ const AuthManagement = () => {
 
   const onEditAccount = async (form) => {
     try {
+      // API update không cần gửi lại 'tenDangNhap' và 'ngayTao'
+      // Component Box đã tự động lấy các trường cần thiết từ 'editFields'
       await authService.update(selected.maTaiKhoan, form);
-      showToast("✅ Cập nhật tài khoản thành công!");
+      showToast("Cập nhật tài khoản thành công!");
       setIsEditOpen(false);
+      setSelected(null);
       fetchData();
     } catch (err) {
       showToast(err.message, "error");
     }
   };
 
-  const handleChangePassword = async (form) => {
-    try {
-      await authService.changePassword(form);
-      showToast("✅ Đổi mật khẩu thành công!");
-      setChangePwModal(false);
-    } catch (err) {
-      showToast(err.message, "error");
-    }
-  };
+  // Đã xóa handler 'handleChangePassword'
 
   const overviewFields = overview
     ? [
@@ -193,6 +196,24 @@ const AuthManagement = () => {
     { value: "tenDangNhap", label: "Tên đăng nhập" },
   ];
 
+  const createFields = [
+    {
+      name: "tenDangNhap",
+      label: "Tên đăng nhập",
+      type: "text",
+      defaultValue: "",
+    },
+    { name: "matKhau", label: "Mật khẩu", type: "password", defaultValue: "" },
+    { name: "email", label: "Email", type: "email", defaultValue: "" },
+    {
+      name: "vaiTro",
+      label: "Vai trò",
+      type: "select",
+      options: ["Nhân viên", "Quản lý"],
+      defaultValue: "Nhân viên",
+    },
+  ];
+
   const editFields = [
     { name: "email", label: "Email", type: "text" },
     {
@@ -209,11 +230,8 @@ const AuthManagement = () => {
     },
   ];
 
-  const passwordFields = [
-    { name: "matKhauCu", label: "Mật khẩu cũ", type: "password", required: true },
-    { name: "matKhauMoi", label: "Mật khẩu mới", type: "password", required: true },
-  ];
-if (loading) return <Loading />;
+  if (loading) return <Loading />;
+
   return (
     <div className="space-y-6 transition-colors duration-300">
       <BoxOnView title="Thống kê tài khoản" fields={overviewFields} />
@@ -253,19 +271,22 @@ if (loading) return <Loading />;
           columns={columns}
           data={accounts}
           loading={loading}
-          onView={(row) => {
-            if (row.tenDangNhap === user.tenDangNhap) {
-              setSelected(row);
-              setChangePwModal(true);
-            } else {
-              showToast("⚠️ Bạn chỉ có thể đổi mật khẩu cho tài khoản của chính bạn!", "warning");
-            }
-          }}
+          // ✨ START: THAY ĐỔI TỪ ĐÂY
+          // Đã xóa prop 'onView' và 'extraIcon'
           onEdit={(row) => {
+            // Không cho phép chỉnh sửa tài khoản của chính mình trong bảng này
+            // để tránh tự khóa tài khoản hoặc thay đổi vai trò.
+            if (row.tenDangNhap === user.tenDangNhap) {
+              showToast(
+                "⚠️ Không thể chỉnh sửa tài khoản của chính bạn ở đây.",
+                "warning"
+              );
+              return;
+            }
             setSelected(row);
             setIsEditOpen(true);
           }}
-          extraIcon={Eye}
+          // ✨ END: THAY ĐỔI TỚI ĐÂY
         />
       </div>
 
@@ -279,23 +300,22 @@ if (loading) return <Loading />;
       {/* 🛠️ Modal Edit / Create */}
       {isEditOpen && (
         <Box
-          title={selected ? `Chỉnh sửa: ${selected.tenDangNhap}` : "Tạo tài khoản mới"}
-          fields={editFields}
+          title={
+            selected
+              ? `Chỉnh sửa: ${selected.tenDangNhap}`
+              : "Tạo tài khoản mới"
+          }
+          fields={selected ? editFields : createFields}
           initialData={selected}
-          onClose={() => setIsEditOpen(false)}
+          onClose={() => {
+            setIsEditOpen(false);
+            setSelected(null);
+          }}
           onSubmit={selected ? onEditAccount : onCreateAccount}
         />
       )}
 
-      {/* 🔑 Change Password Modal */}
-      {changePwModal && isMyAccount && (
-        <Box
-          title="Đổi mật khẩu"
-          fields={passwordFields}
-          onClose={() => setChangePwModal(false)}
-          onSubmit={handleChangePassword}
-        />
-      )}
+      {/* Đã xóa Modal đổi mật khẩu */}
     </div>
   );
 };
