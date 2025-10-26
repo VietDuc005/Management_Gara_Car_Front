@@ -11,6 +11,7 @@ import ServiceFormModal from "../components/common/ServiceFormModal";
 import ConfirmModal from "../components/common/ConfirmModal";
 import { Plus } from "lucide-react";
 import { formatCurrency, formatDateTime } from "../utils/helpers";
+import Loading from "../components/common/Loading";
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -292,6 +293,8 @@ const ServiceManagement = () => {
         },
       ]
     : [];
+
+    if (loading) return <Loading />;
   return (
     <div className="space-y-6 transition-colors duration-300">
   <BoxOnView title="Tổng quan dịch vụ" fields={overviewFields} />

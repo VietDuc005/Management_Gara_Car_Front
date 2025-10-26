@@ -10,6 +10,7 @@ import BoxOnView from "../components/common/BoxOnView";
 import { Plus, Eye } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { formatDate } from "../utils/helpers";
+import Loading from "../components/common/Loading";
 
 const AuthManagement = () => {
   const { user } = useAuth();
@@ -212,7 +213,7 @@ const AuthManagement = () => {
     { name: "matKhauCu", label: "Mật khẩu cũ", type: "password", required: true },
     { name: "matKhauMoi", label: "Mật khẩu mới", type: "password", required: true },
   ];
-
+if (loading) return <Loading />;
   return (
     <div className="space-y-6 transition-colors duration-300">
       <BoxOnView title="Thống kê tài khoản" fields={overviewFields} />

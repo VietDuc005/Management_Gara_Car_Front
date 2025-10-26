@@ -10,6 +10,7 @@ import Box from "../components/common/Box";
 import BoxOnView from "../components/common/BoxOnView";
 import ConfirmModal from "../components/common/ConfirmModal";
 import { Plus } from "lucide-react";
+import Loading from "../components/common/Loading";
 
 // ========== Màu sắc trạng thái ==========
 const getStatusColor = (status) => {
@@ -280,6 +281,7 @@ const VehicleManagement = () => {
       ]
     : [];
 
+    if (loading) return <Loading />;
   // ========== UI ==========
   return (
     <div className="space-y-6 transition-colors duration-300">

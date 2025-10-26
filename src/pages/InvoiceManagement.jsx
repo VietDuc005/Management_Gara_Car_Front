@@ -10,6 +10,7 @@ import SearchWithOptions from "../components/common/SearchBar";
 import BoxOnView from "../components/common/BoxOnView";
 import { statisticService } from "../services/statisticService";
 import { formatDateTime, formatCurrency } from "../utils/helpers";
+import Loading from "../components/common/Loading";
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -252,6 +253,8 @@ const InvoiceManagement = () => {
         },
       ]
     : [];
+
+    if (loading) return <Loading />;
   return (
     <div className="space-y-6">
       <BoxOnView title="Tổng quan hóa đơn" fields={overviewFields} />
