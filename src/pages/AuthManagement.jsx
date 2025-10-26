@@ -9,10 +9,46 @@ import SortControls from "../components/common/SortControls";
 import Pagination from "../components/common/Pagination";
 import Box from "../components/common/Box";
 import BoxOnView from "../components/common/BoxOnView";
-import { Plus } from "lucide-react"; // Bỏ icon "Eye"
+import { Plus, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { formatDate } from "../utils/helpers";
 import Loading from "../components/common/Loading";
+
+// Component Modal lựa chọn hành động
+const ActionMenuModal = ({ user, onClose, onEditInfo, onChangePassword }) => {
+  if (!user) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fade-in">
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 w-[360px] relative">
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full"
+        >
+          <X size={20} />
+        </button>
+        <h3 className="text-lg font-bold text-center mb-5">
+          Tùy chọn cho:{" "}
+          <span className="text-orange-500">{user.tenDangNhap}</span>
+        </h3>
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={onEditInfo}
+            className="w-full px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-600 text-white font-semibold transition"
+          >
+            Chỉnh sửa thông tin
+          </button>
+          <button
+            onClick={onChangePassword}
+            className="w-full px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-semibold transition"
+          >
+            Đổi mật khẩu
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const AuthManagement = () => {
   const { user } = useAuth();
@@ -31,15 +67,17 @@ const AuthManagement = () => {
     size: 10,
     totalPages: 1,
   });
-
   const [sortConfig, setSortConfig] = useState({
     sortBy: "ngayTao",
     sortDirection: "desc",
   });
 
   const [selected, setSelected] = useState(null);
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  // Đã xóa state 'changePwModal'
+
+  // State quản lý các loại modal
+  const [isCreateEditOpen, setIsCreateEditOpen] = useState(false);
+  const [isChangePwOpen, setIsChangePwOpen] = useState(false);
+  const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
 
   // Debounce Search
   useEffect(() => {
@@ -50,7 +88,7 @@ const AuthManagement = () => {
     return () => clearTimeout(t);
   }, [searchTerm]);
 
-  // ========= Fetch Thống kê =========
+  // Fetch Thống kê
   const fetchOverview = useCallback(async () => {
     try {
       const res = await authService.getStatistics();
@@ -60,7 +98,7 @@ const AuthManagement = () => {
     }
   }, []);
 
-  // ========= Fetch dữ liệu =========
+  // Fetch dữ liệu
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
@@ -77,13 +115,9 @@ const AuthManagement = () => {
       } else {
         response = await authService.getAll(page, size, sortBy, sortDirection);
       }
-
       const data = response.data || response;
       setAccounts(data.content || []);
-      setPagination((p) => ({
-        ...p,
-        totalPages: data.totalPages || 1,
-      }));
+      setPagination((p) => ({ ...p, totalPages: data.totalPages || 1 }));
     } catch (err) {
       showToast("Tải dữ liệu thất bại!", "error");
     } finally {
@@ -103,12 +137,19 @@ const AuthManagement = () => {
     fetchData();
   }, [fetchData, fetchOverview]);
 
-  // ========= Handlers =========
+  // Handlers
+  const handleCloseAllModals = () => {
+    setSelected(null);
+    setIsCreateEditOpen(false);
+    setIsChangePwOpen(false);
+    setIsActionMenuOpen(false);
+  };
+
   const onCreateAccount = async (form) => {
     try {
       await authService.register(form);
       showToast("Tạo tài khoản thành công!");
-      setIsEditOpen(false);
+      handleCloseAllModals();
       fetchData();
       fetchOverview();
     } catch (err) {
@@ -118,20 +159,41 @@ const AuthManagement = () => {
 
   const onEditAccount = async (form) => {
     try {
-      // API update không cần gửi lại 'tenDangNhap' và 'ngayTao'
-      // Component Box đã tự động lấy các trường cần thiết từ 'editFields'
       await authService.update(selected.maTaiKhoan, form);
       showToast("Cập nhật tài khoản thành công!");
-      setIsEditOpen(false);
-      setSelected(null);
+      handleCloseAllModals();
       fetchData();
     } catch (err) {
       showToast(err.message, "error");
     }
   };
 
-  // Đã xóa handler 'handleChangePassword'
+  const onAdminChangePassword = async (form) => {
+    if (form.matKhauMoi !== form.xacNhanMatKhau) {
+      showToast("Mật khẩu xác nhận không khớp!", "warning");
+      return;
+    }
+    if (!form.matKhauMoi) {
+      showToast("Mật khẩu không được để trống!", "warning");
+      return;
+    }
+    try {
+      // ✨ THAY ĐỔI Ở ĐÂY: Gọi API update và chỉ truyền trường mật khẩu ✨
+      await authService.update(selected.maTaiKhoan, {
+        matKhau: form.matKhauMoi,
+      });
 
+      showToast(
+        `Đã đổi mật khẩu cho tài khoản "${selected.tenDangNhap}" thành công!`,
+        "success"
+      );
+      handleCloseAllModals();
+    } catch (err) {
+      showToast(err.message, "error");
+    }
+  };
+
+  // UI Configurations
   const overviewFields = overview
     ? [
         {
@@ -196,15 +258,11 @@ const AuthManagement = () => {
     { value: "tenDangNhap", label: "Tên đăng nhập" },
   ];
 
+  // Fields configurations for modals
   const createFields = [
-    {
-      name: "tenDangNhap",
-      label: "Tên đăng nhập",
-      type: "text",
-      defaultValue: "",
-    },
-    { name: "matKhau", label: "Mật khẩu", type: "password", defaultValue: "" },
-    { name: "email", label: "Email", type: "email", defaultValue: "" },
+    { name: "tenDangNhap", label: "Tên đăng nhập", type: "text" },
+    { name: "matKhau", label: "Mật khẩu", type: "password" },
+    { name: "email", label: "Email", type: "email" },
     {
       name: "vaiTro",
       label: "Vai trò",
@@ -214,7 +272,13 @@ const AuthManagement = () => {
     },
   ];
 
-  const editFields = [
+  const editInfoFields = [
+    {
+      name: "tenDangNhap",
+      label: "Tên đăng nhập",
+      type: "text",
+      disabled: true,
+    },
     { name: "email", label: "Email", type: "text" },
     {
       name: "vaiTro",
@@ -230,33 +294,40 @@ const AuthManagement = () => {
     },
   ];
 
+  const changePasswordFields = [
+    { name: "matKhauMoi", label: "Mật khẩu mới", type: "password" },
+    { name: "xacNhanMatKhau", label: "Xác nhận mật khẩu", type: "password" },
+  ];
+
   if (loading) return <Loading />;
 
   return (
     <div className="space-y-6 transition-colors duration-300">
       <BoxOnView title="Thống kê tài khoản" fields={overviewFields} />
 
-      {/* 🔍 Search + Sort + Button */}
       <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md flex flex-wrap items-center justify-between gap-4">
         <SearchWithOptions
-          searchField={searchField}
-          searchTerm={searchTerm}
-          options={searchOptions}
-          onSearchFieldChange={setSearchField}
-          onSearchTermChange={setSearchTerm}
-          placeholder="Nhập nội dung tìm kiếm..."
+          {...{
+            searchField,
+            searchTerm,
+            options: searchOptions,
+            onSearchFieldChange: setSearchField,
+            onSearchTermChange: setSearchTerm,
+            placeholder: "Nhập nội dung tìm kiếm...",
+          }}
         />
-
         <div className="flex gap-3">
           <SortControls
-            sortConfig={sortConfig}
-            options={sortOptions}
-            onSortChange={setSortConfig}
+            {...{
+              sortConfig,
+              options: sortOptions,
+              onSortChange: setSortConfig,
+            }}
           />
           <button
             onClick={() => {
               setSelected(null);
-              setIsEditOpen(true);
+              setIsCreateEditOpen(true);
             }}
             className="px-4 py-2 bg-orange-500 text-white rounded-lg flex items-center gap-2 font-medium hover:bg-orange-600 active:scale-95"
           >
@@ -265,57 +336,73 @@ const AuthManagement = () => {
         </div>
       </div>
 
-      {/* 📄 TABLE */}
       <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md overflow-x-auto">
         <Table
           columns={columns}
           data={accounts}
           loading={loading}
-          // ✨ START: THAY ĐỔI TỪ ĐÂY
-          // Đã xóa prop 'onView' và 'extraIcon'
           onEdit={(row) => {
-            // Không cho phép chỉnh sửa tài khoản của chính mình trong bảng này
-            // để tránh tự khóa tài khoản hoặc thay đổi vai trò.
             if (row.tenDangNhap === user.tenDangNhap) {
               showToast(
-                "⚠️ Không thể chỉnh sửa tài khoản của chính bạn ở đây.",
+                "⚠️ Không thể tự thao tác trên tài khoản của chính bạn ở đây.",
                 "warning"
               );
               return;
             }
             setSelected(row);
-            setIsEditOpen(true);
+            setIsActionMenuOpen(true); // Mở menu lựa chọn
           }}
-          // ✨ END: THAY ĐỔI TỚI ĐÂY
         />
       </div>
 
-      {/* 🔄 Pagination */}
       <Pagination
         currentPage={pagination.page}
         totalPages={pagination.totalPages}
         onPageChange={(p) => setPagination((prev) => ({ ...prev, page: p }))}
       />
 
-      {/* 🛠️ Modal Edit / Create */}
-      {isEditOpen && (
+      {/* MODALS */}
+
+      {/* Menu chọn hành động */}
+      {isActionMenuOpen && (
+        <ActionMenuModal
+          user={selected}
+          onClose={handleCloseAllModals}
+          onEditInfo={() => {
+            setIsActionMenuOpen(false);
+            setIsCreateEditOpen(true);
+          }}
+          onChangePassword={() => {
+            setIsActionMenuOpen(false);
+            setIsChangePwOpen(true);
+          }}
+        />
+      )}
+
+      {/* Modal Thêm mới / Sửa thông tin */}
+      {isCreateEditOpen && (
         <Box
           title={
             selected
               ? `Chỉnh sửa: ${selected.tenDangNhap}`
               : "Tạo tài khoản mới"
           }
-          fields={selected ? editFields : createFields}
+          fields={selected ? editInfoFields : createFields}
           initialData={selected}
-          onClose={() => {
-            setIsEditOpen(false);
-            setSelected(null);
-          }}
+          onClose={handleCloseAllModals}
           onSubmit={selected ? onEditAccount : onCreateAccount}
         />
       )}
 
-      {/* Đã xóa Modal đổi mật khẩu */}
+      {/* Modal Đổi mật khẩu */}
+      {isChangePwOpen && (
+        <Box
+          title={`Đổi mật khẩu cho: ${selected.tenDangNhap}`}
+          fields={changePasswordFields}
+          onClose={handleCloseAllModals}
+          onSubmit={onAdminChangePassword}
+        />
+      )}
     </div>
   );
 };
