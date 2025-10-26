@@ -11,7 +11,7 @@ import {
   Moon,
   Car,
   FileText,
-} from "lucide-react";
+  } from "lucide-react";
 
 function Sidebar({ onLogout, collapsed, setCollapsed }) {
   const [theme, setTheme] = React.useState(
@@ -51,6 +51,7 @@ function Sidebar({ onLogout, collapsed, setCollapsed }) {
     { path: "/services", label: "Dịch vụ", icon: <FileText size={20} /> },
     { path: "/vehicles", label: "Phương tiện", icon: <Car size={20} /> },
     { path: "/sales", label: "Bán hàng", icon: <Car size={20} /> },
+    { path: "/auth", label: "Tài khoản", icon: <Users size={20} /> },
   ];
 
   const getNavLinkClass = ({ isActive }) =>

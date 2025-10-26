@@ -28,6 +28,7 @@ import SalesManagement from "./pages/SalesManagement";
 import VehicleManagement from "./pages/VehicleMangement"; // Giữ nguyên tên file sai
 import RepairManagement from "./pages/RepairManagement";
 import ServiceSalesDetail from "./pages/ServiceSalesDetail"; // ✅ 2. Import trang chi tiết mới
+import AuthManagement from "./pages/AuthManagement";
 
 // ===================== ProtectedRoute Component =====================
 const ProtectedRoute = ({ requireAdmin = false }) => {
@@ -83,6 +84,7 @@ function App() {
                   <Route path="services/:id" element={<ServiceDetail />} />
                   <Route path="vehicles" element={<VehicleManagement />} />
                   <Route path="sales" element={<SalesManagement />} />
+                  <Route path="auth" element={<AuthManagement />} />
                   {/* ✅ 4. Thêm route cho trang chi tiết bán hàng */}
                   <Route
                     path="sales/services/:id"
