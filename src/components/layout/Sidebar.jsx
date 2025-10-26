@@ -11,51 +11,75 @@ import {
   Moon,
   Car,
   FileText,
-  } from "lucide-react";
+  ShoppingCart,
+  User,
+  UserCog,
+} from "lucide-react";
 
 function Sidebar({ onLogout, collapsed, setCollapsed }) {
   const [theme, setTheme] = React.useState(
     localStorage.getItem("theme") || "light"
   );
 
-  // Khi thay đổi theme -> cập nhật class HTML và lưu localStorage
   React.useEffect(() => {
-    const root = window.document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
+    document.documentElement.classList.toggle("dark", theme === "dark");
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  };
+  const toggleTheme = () =>
+    setTheme((t) => (t === "dark" ? "light" : "dark"));
 
-  const menuItemsManage = [
+  // ========= MENU STRUCTURE ========= //
+  const sectionMenu = [
     {
-      path: "/dashboard",
-      label: "Trang chủ",
-      icon: <LayoutDashboard size={20} />,
+      title: null, // Không có tiêu đề phần này (Dashboard + Bán hàng)
+      items: [
+        {
+          path: "/dashboard",
+          label: "Trang chủ",
+          icon: <LayoutDashboard size={20} />,
+        },
+        {
+          path: "/sales",
+          label: "Bán hàng",
+          icon: <ShoppingCart size={20} />,
+        },
+      ],
     },
-    { path: "/invoice", label: "Hóa đơn", icon: <Users size={20} /> },
     {
-      path: "/service-types",
-      label: "Loại Dịch vụ",
-      icon: <Layers size={20} />,
+      title: "QUẢN LÝ",
+      items: [
+        { path: "/invoice", label: "Hóa đơn", icon: <FileText size={20} /> },
+        {
+          path: "/service-types",
+          label: "Loại Dịch vụ",
+          icon: <Layers size={20} />,
+        },
+        { path: "/customers", label: "Khách hàng", icon: <User size={20} /> },
+        { path: "/machine", label: "Thợ", icon: <UserCog size={20} /> },
+        {
+          path: "/repairs",
+          label: "Phiếu sửa chữa",
+          icon: <Wrench size={20} />,
+        },
+        { path: "/services", label: "Dịch vụ", icon: <FileText size={20} /> },
+        { path: "/vehicles", label: "Phương tiện", icon: <Car size={20} /> },
+      ],
     },
-    { path: "/customers", label: "Khách hàng", icon: <Users size={20} /> },
-    { path: "/machine", label: "Thợ", icon: <Wrench size={20} /> },
-    { path: "/repairs", label: "Phiếu sửa chữa", icon: <FileText size={20} /> },
-    { path: "/services", label: "Dịch vụ", icon: <FileText size={20} /> },
-    { path: "/vehicles", label: "Phương tiện", icon: <Car size={20} /> },
-    { path: "/sales", label: "Bán hàng", icon: <Car size={20} /> },
-    { path: "/auth", label: "Tài khoản", icon: <Users size={20} /> },
+    {
+      title: "HỆ THỐNG",
+      items: [
+        {
+          path: "/auth",
+          label: "Tài khoản",
+          icon: <Users size={20} />,
+        },
+      ],
+    },
   ];
 
   const getNavLinkClass = ({ isActive }) =>
-    `flex items-center gap-3 w-full text-left px-3 py-2 rounded-lg mb-1 font-medium transition-all duration-150 ${
+    `flex items-center gap-3 w-full text-left px-3 py-2 rounded-lg font-medium transition-all duration-150 ${
       isActive
         ? "bg-orange-500 text-white shadow-sm"
         : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -68,6 +92,7 @@ function Sidebar({ onLogout, collapsed, setCollapsed }) {
       ${collapsed ? "w-20" : "w-64"}`}
     >
       <div className="flex flex-col overflow-y-auto">
+
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
           {!collapsed && (
@@ -84,27 +109,37 @@ function Sidebar({ onLogout, collapsed, setCollapsed }) {
           </button>
         </div>
 
-        {/* Menu Items */}
-        <nav className="px-3 pt-3">
-          {menuItemsManage.map((item) => (
-            <NavLink key={item.path} to={item.path} className={getNavLinkClass}>
-              {item.icon}
-              {!collapsed && <span>{item.label}</span>}
-            </NavLink>
+        {/* Render Sections */}
+        <nav className="px-3 pt-3 space-y-4">
+          {sectionMenu.map((section, idx) => (
+            <div key={idx}>
+              {section.title && !collapsed && (
+                <p className="text-xs font-bold text-gray-500 dark:text-gray-400 px-2 mb-2 uppercase tracking-wide">
+                  {section.title}
+                </p>
+              )}
+
+              {section.items.map((item) => (
+                <NavLink key={item.path} to={item.path} className={getNavLinkClass}>
+                  {item.icon}
+                  {!collapsed && <span>{item.label}</span>}
+                </NavLink>
+              ))}
+            </div>
           ))}
         </nav>
       </div>
 
-      {/* Theme Toggle + Logout */}
+      {/* Theme + Logout */}
       <div className="p-4 border-t bg-gray-50 dark:bg-gray-800 dark:border-gray-700 flex flex-col gap-3">
-        {/* Nút chuyển Sáng / Tối */}
+
+        {/* Dark / Light Toggle */}
         <button
           onClick={toggleTheme}
           className={`flex items-center ${
             collapsed ? "justify-center" : "justify-start gap-3"
           } w-full py-2 font-semibold rounded-lg border border-gray-300 dark:border-gray-600
             hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200`}
-          title="Chuyển chế độ sáng/tối"
         >
           {theme === "dark" ? (
             <>
@@ -119,7 +154,7 @@ function Sidebar({ onLogout, collapsed, setCollapsed }) {
           )}
         </button>
 
-        {/* Nút Đăng xuất */}
+        {/* Logout */}
         <button
           onClick={onLogout}
           className={`flex items-center ${
