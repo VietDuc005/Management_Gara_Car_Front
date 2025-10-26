@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastContext";
-import { CartProvider } from "./context/CartContext"; // ✅ 1. Import CartProvider
+import { CartProvider } from "./context/CartContext";
 
 // Auth components
 import Login from "./components/auth/Login";
@@ -25,14 +25,15 @@ import MachineManagement from "./pages/MachineManagement";
 import ServiceManagement from "./pages/ServiceManagement";
 import ServiceDetail from "./pages/ServiceDetail";
 import SalesManagement from "./pages/SalesManagement";
-import VehicleManagement from "./pages/VehicleMangement"; // Giữ nguyên tên file sai
+import VehicleManagement from "./pages/VehicleMangement";
 import RepairManagement from "./pages/RepairManagement";
-import ServiceSalesDetail from "./pages/ServiceSalesDetail"; // ✅ 2. Import trang chi tiết mới
+import ServiceSalesDetail from "./pages/ServiceSalesDetail";
 import AuthManagement from "./pages/AuthManagement";
+import AccessDenied from "./components/auth/AccessDenied"; // Component thông báo không có quyền
 
 // ===================== ProtectedRoute Component =====================
-const ProtectedRoute = ({ requireAdmin = false }) => {
-  const { user, isAdmin, loading } = useAuth();
+const ProtectedRoute = ({ requireManager = false }) => {
+  const { user, isManager, loading } = useAuth();
 
   if (loading) {
     return (
@@ -45,8 +46,13 @@ const ProtectedRoute = ({ requireAdmin = false }) => {
     );
   }
 
+  // Chưa đăng nhập -> chuyển về login
   if (!user) return <Navigate to="/login" replace />;
-  if (requireAdmin && !isAdmin()) return <Navigate to="/login" replace />;
+
+  // Yêu cầu quyền Quản lý nhưng user không phải Quản lý
+  if (requireManager && !isManager()) {
+    return <Navigate to="/access-denied" replace />;
+  }
 
   return <Outlet />;
 };
@@ -58,21 +64,18 @@ function App() {
       <AuthProvider>
         <ToastProvider>
           <CartProvider>
-            {" "}
-            {/* ✅ 3. Bọc ứng dụng trong CartProvider */}
             <Routes>
               <Route path="/login" element={<Login />} />
+              <Route path="/access-denied" element={<AccessDenied />} />
 
               {/* --- Protected routes --- */}
               <Route element={<ProtectedRoute />}>
-                {/* Layout sẽ là route cha, chứa Sidebar và Header */}
                 <Route path="/" element={<Layout />}>
                   {/* Trang mặc định */}
                   <Route index element={<Navigate to="/dashboard" replace />} />
-                  {/* Định nghĩa các trang con */}
-                  <Route path="dashboard" element={<Dashboard />} />
-                  <Route path="invoice" element={<InvoiceManagement />} />{" "}
-                  {/* Sửa lại path */}
+
+                  {/* Các trang KHÔNG yêu cầu quyền Quản lý */}
+                  <Route path="invoice" element={<InvoiceManagement />} />
                   <Route
                     path="service-types"
                     element={<ServiceTypeManagement />}
@@ -84,12 +87,21 @@ function App() {
                   <Route path="services/:id" element={<ServiceDetail />} />
                   <Route path="vehicles" element={<VehicleManagement />} />
                   <Route path="sales" element={<SalesManagement />} />
-                  <Route path="auth" element={<AuthManagement />} />
-                  {/* ✅ 4. Thêm route cho trang chi tiết bán hàng */}
                   <Route
                     path="sales/services/:id"
                     element={<ServiceSalesDetail />}
                   />
+                </Route>
+              </Route>
+
+              {/* --- Routes YÊU CẦU quyền Quản lý --- */}
+              <Route element={<ProtectedRoute requireManager={true} />}>
+                <Route path="/" element={<Layout />}>
+                  {/* Trang Thống kê (Dashboard) - CHỈ Quản lý */}
+                  <Route path="dashboard" element={<Dashboard />} />
+
+                  {/* Trang Quản lý Tài khoản - CHỈ Quản lý */}
+                  <Route path="auth" element={<AuthManagement />} />
                 </Route>
               </Route>
 

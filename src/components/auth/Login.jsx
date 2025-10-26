@@ -22,8 +22,10 @@ const Login = () => {
 
     try {
       await login(formData.username, formData.password);
-      navigate("/service-types");
+      // Đăng nhập thành công, chuyển về dashboard
+      navigate("/dashboard");
     } catch (err) {
+      // Hiển thị lỗi từ server hoặc lỗi mặc định
       setError(err.message || "Đăng nhập thất bại. Vui lòng thử lại!");
     } finally {
       setLoading(false);
@@ -34,7 +36,7 @@ const Login = () => {
     <div className="min-h-screen bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl p-8 border border-orange-100">
-          {/* --- LOGO + TITLE --- */}
+          {/* LOGO + TITLE */}
           <div className="flex items-center justify-center mb-8">
             <div className="p-3 bg-orange-100 rounded-full">
               <Wrench className="w-7 h-7 text-orange-600" />
@@ -48,7 +50,7 @@ const Login = () => {
             Đăng nhập hệ thống quản lý gara
           </h2>
 
-          {/* --- FORM --- */}
+          {/* FORM */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1">
@@ -80,7 +82,7 @@ const Login = () => {
               />
             </div>
 
-            {/* --- THÔNG BÁO LỖI --- */}
+            {/* THÔNG BÁO LỖI */}
             {error && (
               <div className="p-3 bg-red-100 text-red-600 rounded-lg text-sm flex items-center gap-2">
                 <AlertCircle size={16} />
@@ -88,7 +90,7 @@ const Login = () => {
               </div>
             )}
 
-            {/* --- NÚT ĐĂNG NHẬP --- */}
+            {/* NÚT ĐĂNG NHẬP */}
             <button
               type="submit"
               disabled={loading}
@@ -98,9 +100,9 @@ const Login = () => {
             </button>
           </form>
 
-          {/* --- FOOTER --- */}
+          {/* FOOTER */}
           <p className="text-xs text-gray-500 mt-6 text-center">
-            © 2025 Garage Management System — Powered by React & Spring Boot
+            © 2025 Garage Management System – Powered by React & Spring Boot
           </p>
         </div>
       </div>

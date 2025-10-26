@@ -1,7 +1,12 @@
+// src/services/api.js
 import axios from "axios";
-import { API_BASE_URL } from "../utils/constants"; // Đảm bảo bạn có file này và export API_BASE_URL
+import { API_BASE_URL } from "../utils/constants";
 
-const getAuthToken = () => localStorage.getItem("authToken");
+// Hàm lấy token - ƯU TIÊN lấy từ "token" (do AuthContext lưu)
+// Nếu không có thì fallback về "authToken" (legacy)
+const getAuthToken = () => {
+  return localStorage.getItem("token") || localStorage.getItem("authToken");
+};
 
 // 1. Tạo một instance của Axios với cấu hình cơ bản
 const axiosInstance = axios.create({
@@ -46,8 +51,16 @@ axiosInstance.interceptors.response.use(
 
     // Xử lý lỗi 401 Unauthorized
     if (error.response && error.response.status === 401) {
+      // Xóa cả 2 loại token để đảm bảo logout hoàn toàn
+      localStorage.removeItem("token");
       localStorage.removeItem("authToken");
-      window.location.href = "/login";
+      localStorage.removeItem("user");
+
+      // Chỉ redirect nếu không phải đang ở trang login
+      if (!window.location.pathname.includes("/login")) {
+        window.location.href = "/login";
+      }
+
       // Ném lỗi để dừng xử lý tiếp theo trong component
       return Promise.reject(
         new Error(
@@ -70,7 +83,7 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-// 4. Viết lại hàm apiCall sử dụng axiosInstance
+// 4. Hàm apiCall sử dụng axiosInstance
 export const apiCall = async (endpoint, options = {}) => {
   // Destructure các thuộc tính phổ biến từ options
   const { method = "GET", data, params, ...restOptions } = options;
@@ -93,3 +106,6 @@ export const apiCall = async (endpoint, options = {}) => {
     throw error;
   }
 };
+
+// Export axiosInstance để có thể sử dụng trực tiếp nếu cần
+export default axiosInstance;
