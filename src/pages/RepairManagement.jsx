@@ -11,6 +11,7 @@ import BoxOnView from "../components/common/BoxOnView";
 import { statisticService } from "../services/statisticService";
 import { Plus } from "lucide-react";
 import { formatDate, formatCurrency } from "../utils/helpers";
+import Loading from "../components/common/Loading";
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -271,6 +272,8 @@ const overviewFields = overview
         },
       ]
     : [];
+
+    if (loading) return <Loading />;
   return (
     <div className="space-y-6 transition-colors duration-300">
       <BoxOnView title="Tổng quan phiếu sửa chữa" fields={overviewFields} />

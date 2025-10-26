@@ -10,6 +10,7 @@ import ConfirmModal from "../components/common/ConfirmModal";
 import { serviceTypeService } from "../services/serviceTypeService";
 import { formatDate } from "../utils/helpers";
 import { Plus } from "lucide-react";
+import Loading from "../components/common/Loading";
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -258,6 +259,7 @@ const ServiceTypeManagement = () => {
     { key: "ngayTao", label: "Ngày Tạo", render: (value) => formatDate(value) },
   ];
 
+  if (loading) return <Loading />;
   // === RENDER ===
   return (
     <div className="space-y-6 transition-colors duration-300">

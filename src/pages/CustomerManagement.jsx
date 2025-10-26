@@ -9,7 +9,7 @@ import Box from "../components/common/Box";
 import ConfirmModal from "../components/common/ConfirmModal";
 import { customerService } from "../services/customerService";
 import { Plus } from "lucide-react";
-
+import Loading from "../components/common/Loading";
 const getStatusColor = (status) => {
   switch (status) {
     case "Hoạt động":
@@ -276,7 +276,7 @@ const [overview, setOverview] = useState(null);
       ),
     },
   ];
-
+if (loading) return <Loading />;
   return (
     <div className="space-y-6 transition-colors duration-300">
       <BoxOnView title="Tổng quan khách hàng" fields={overviewFields} />

@@ -9,6 +9,7 @@ import BoxOnView from "../components/common/BoxOnView";
 import ConfirmModal from "../components/common/ConfirmModal";
 import { machineService } from "../services/machineService";
 import { Plus } from "lucide-react";
+import Loading from "../components/common/Loading";
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -407,6 +408,7 @@ invalidNumbers.forEach(num => {
     { key: "ngayVaoLam", label: "Ngày Vào Làm " },
   ];
 
+  if (loading) return <Loading />;
   return (
     <div className="space-y-6 transition-colors duration-300">
       <BoxOnView title="Tổng quan Thợ" fields={overviewFields} />

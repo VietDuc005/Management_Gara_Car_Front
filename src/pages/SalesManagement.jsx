@@ -7,6 +7,7 @@ import { Search, ClipboardList, ChevronsLeft } from "lucide-react";
 import { serviceService } from "../services/serviceService";
 import { serviceTypeService } from "../services/serviceTypeService";
 import { formatCurrency } from "../utils/helpers";
+import Loading from "../components/common/Loading";
 
 const SalesManagement = () => {
   const navigate = useNavigate();
@@ -151,6 +152,7 @@ const SalesManagement = () => {
     return isAvailable && matchCategory && matchSearch;
   });
 
+  if (loading) return <Loading />;
   return (
     <div className="flex h-screen overflow-hidden relative bg-gray-50 dark:bg-gray-800">
       {/* KHU VỰC SẢN PHẨM */}

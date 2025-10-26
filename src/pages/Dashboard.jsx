@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import BoxOnView from "../components/common/BoxOnView";
-import Table from "../components/common/Table";
+import Loading from "../components/common/Loading";
 import { useToast } from "../context/ToastContext";
 
 import {
@@ -30,7 +29,7 @@ const COLORS = [
 ];
 
 const Dashboard = () => {
-  const navigate = useNavigate();
+  
 const { showToast } = useToast();
 
   const [overview, setOverview] = useState(null);
@@ -206,26 +205,11 @@ const fetchTopServices = useCallback(async () => {
       ]
     : [];
     
-    const topColumns = [
-  { key: "stt", label: "STT" },
-  { key: "tenDichVu", label: "Tên dịch vụ" },
-  {
-    key: "soLuongSuDung",
-    label: "Số lần sử dụng",
-    render: (v) => (
-      <span className="font-semibold text-orange-600">{v}</span>
-    ),
-  },
-];
+    
 
 
   // ======== HIỂN THỊ UI ========
-  if (loading)
-    return (
-      <div className="flex items-center justify-center min-h-screen text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-950">
-        Đang tải dữ liệu...
-      </div>
-    );
+ if (loading) return <Loading />;
 
   return (
     <div className="space-y-8 transition-colors duration-300">
