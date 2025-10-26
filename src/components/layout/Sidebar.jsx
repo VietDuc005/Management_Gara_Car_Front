@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -14,9 +14,12 @@ import {
   ShoppingCart,
   User,
   UserCog,
+  Lock,
 } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 function Sidebar({ onLogout, collapsed, setCollapsed }) {
+  const { isManager } = useAuth();
   const [theme, setTheme] = React.useState(
     localStorage.getItem("theme") || "light"
   );
@@ -26,44 +29,79 @@ function Sidebar({ onLogout, collapsed, setCollapsed }) {
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  const toggleTheme = () =>
-    setTheme((t) => (t === "dark" ? "light" : "dark"));
+  const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
+
+  // Debounce toggle collapse để tránh ResizeObserver error
+  const handleToggleCollapse = useCallback(() => {
+    requestAnimationFrame(() => {
+      setCollapsed(!collapsed);
+    });
+  }, [collapsed, setCollapsed]);
 
   // ========= MENU STRUCTURE ========= //
   const sectionMenu = [
     {
-      title: null, // Không có tiêu đề phần này (Dashboard + Bán hàng)
+      title: null,
       items: [
         {
           path: "/dashboard",
           label: "Trang chủ",
           icon: <LayoutDashboard size={20} />,
+          requireManager: true,
         },
         {
           path: "/sales",
           label: "Bán hàng",
           icon: <ShoppingCart size={20} />,
+          requireManager: false,
         },
       ],
     },
     {
       title: "QUẢN LÝ",
       items: [
-        { path: "/invoice", label: "Hóa đơn", icon: <FileText size={20} /> },
+        {
+          path: "/invoice",
+          label: "Hóa đơn",
+          icon: <FileText size={20} />,
+          requireManager: false,
+        },
         {
           path: "/service-types",
           label: "Loại Dịch vụ",
           icon: <Layers size={20} />,
+          requireManager: false,
         },
-        { path: "/customers", label: "Khách hàng", icon: <User size={20} /> },
-        { path: "/machine", label: "Thợ", icon: <UserCog size={20} /> },
+        {
+          path: "/customers",
+          label: "Khách hàng",
+          icon: <User size={20} />,
+          requireManager: false,
+        },
+        {
+          path: "/machine",
+          label: "Thợ",
+          icon: <UserCog size={20} />,
+          requireManager: false,
+        },
         {
           path: "/repairs",
           label: "Phiếu sửa chữa",
           icon: <Wrench size={20} />,
+          requireManager: false,
         },
-        { path: "/services", label: "Dịch vụ", icon: <FileText size={20} /> },
-        { path: "/vehicles", label: "Phương tiện", icon: <Car size={20} /> },
+        {
+          path: "/services",
+          label: "Dịch vụ",
+          icon: <FileText size={20} />,
+          requireManager: false,
+        },
+        {
+          path: "/vehicles",
+          label: "Phương tiện",
+          icon: <Car size={20} />,
+          requireManager: false,
+        },
       ],
     },
     {
@@ -73,17 +111,24 @@ function Sidebar({ onLogout, collapsed, setCollapsed }) {
           path: "/auth",
           label: "Tài khoản",
           icon: <Users size={20} />,
+          requireManager: true,
         },
       ],
     },
   ];
 
-  const getNavLinkClass = ({ isActive }) =>
-    `flex items-center gap-3 w-full text-left px-3 py-2 rounded-lg font-medium transition-all duration-150 ${
+  const getNavLinkClass = ({ isActive }, isLocked) => {
+    if (isLocked) {
+      return `flex items-center gap-3 w-full text-left px-3 py-2 rounded-lg font-medium 
+              bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60`;
+    }
+
+    return `flex items-center gap-3 w-full text-left px-3 py-2 rounded-lg font-medium transition-all duration-150 ${
       isActive
         ? "bg-orange-500 text-white shadow-sm"
         : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
     }`;
+  };
 
   return (
     <aside
@@ -92,7 +137,6 @@ function Sidebar({ onLogout, collapsed, setCollapsed }) {
       ${collapsed ? "w-20" : "w-64"}`}
     >
       <div className="flex flex-col overflow-y-auto">
-
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
           {!collapsed && (
@@ -101,7 +145,7 @@ function Sidebar({ onLogout, collapsed, setCollapsed }) {
             </h1>
           )}
           <button
-            onClick={() => setCollapsed(!collapsed)}
+            onClick={handleToggleCollapse}
             className="text-gray-600 dark:text-gray-300 hover:text-orange-500 transition"
             title={collapsed ? "Mở rộng" : "Thu gọn"}
           >
@@ -119,12 +163,38 @@ function Sidebar({ onLogout, collapsed, setCollapsed }) {
                 </p>
               )}
 
-              {section.items.map((item) => (
-                <NavLink key={item.path} to={item.path} className={getNavLinkClass}>
-                  {item.icon}
-                  {!collapsed && <span>{item.label}</span>}
-                </NavLink>
-              ))}
+              {section.items.map((item) => {
+                const isLocked = item.requireManager && !isManager();
+
+                if (isLocked) {
+                  return (
+                    <div
+                      key={item.path}
+                      className={getNavLinkClass({ isActive: false }, true)}
+                      title="Chỉ dành cho Quản lý"
+                    >
+                      {item.icon}
+                      {!collapsed && (
+                        <>
+                          <span>{item.label}</span>
+                          <Lock size={14} className="ml-auto" />
+                        </>
+                      )}
+                    </div>
+                  );
+                }
+
+                return (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    className={(navData) => getNavLinkClass(navData, false)}
+                  >
+                    {item.icon}
+                    {!collapsed && <span>{item.label}</span>}
+                  </NavLink>
+                );
+              })}
             </div>
           ))}
         </nav>
@@ -132,7 +202,6 @@ function Sidebar({ onLogout, collapsed, setCollapsed }) {
 
       {/* Theme + Logout */}
       <div className="p-4 border-t bg-gray-50 dark:bg-gray-800 dark:border-gray-700 flex flex-col gap-3">
-
         {/* Dark / Light Toggle */}
         <button
           onClick={toggleTheme}

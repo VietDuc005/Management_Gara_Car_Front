@@ -94,11 +94,32 @@ const Box = ({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="btn-secondary"
+                  style={{
+                    backgroundColor: "#e9ecef" /* Mã màu nền */,
+                    color: "#495057" /* Mã màu chữ */,
+                    padding: "10px 20px",
+                    border: "none",
+                    borderRadius: "8px",
+                    fontSize: "16px",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                  }}
                 >
                   Hủy
                 </button>
-                <button type="submit" className="btn-primary">
+                <button
+                  type="submit"
+                  style={{
+                    backgroundColor: "#fd7e14" /* Mã màu nền */,
+                    color: "white" /* Mã màu chữ */,
+                    padding: "10px 20px",
+                    border: "none",
+                    borderRadius: "8px",
+                    fontSize: "16px",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                  }}
+                >
                   Lưu
                 </button>
               </>

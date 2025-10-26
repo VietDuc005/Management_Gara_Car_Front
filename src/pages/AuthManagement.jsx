@@ -342,13 +342,6 @@ const AuthManagement = () => {
           data={accounts}
           loading={loading}
           onEdit={(row) => {
-            if (row.tenDangNhap === user.tenDangNhap) {
-              showToast(
-                "⚠️ Không thể tự thao tác trên tài khoản của chính bạn ở đây.",
-                "warning"
-              );
-              return;
-            }
             setSelected(row);
             setIsActionMenuOpen(true); // Mở menu lựa chọn
           }}
