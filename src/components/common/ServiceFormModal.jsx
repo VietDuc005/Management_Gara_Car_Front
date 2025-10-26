@@ -1,7 +1,13 @@
-import React, { useState, useEffect } from "react";
+// src/components/common/ServiceFormModal.jsx
+
+import React, { useState, useEffect, useCallback } from "react";
 import { useToast } from "../../context/ToastContext";
 import { UploadCloud, X } from "lucide-react";
 import { API_BASE_URL } from "../../utils/constants";
+// ✨ START: THAY ĐỔI TỪ ĐÂY
+import AutocompleteInput from "./AutocompleteInput"; // 1. Import component Autocomplete
+import { serviceService } from "../../services/serviceService"; // 2. Import service để gọi API
+// ✨ END: THAY ĐỔI TỚI ĐÂY
 
 const ServiceFormModal = ({
   isOpen,
@@ -32,12 +38,11 @@ const ServiceFormModal = ({
           setImagePreview(`${API_BASE_URL}${initialData.anhDichVuUrl}`);
         }
       } else {
-        // Chế độ thêm mới: Chỉ khởi tạo các trường cần thiết
         setFormData({
           tenDichVu: "",
           moTa: "",
           soLuongTon: 0,
-          soLuongBan: 0, // Vẫn giữ để form không lỗi, nhưng sẽ không gửi đi
+          soLuongBan: 0,
           gia: 0,
           thoiGianUocTinh: 1,
           tenLoaiDichVu: "",
@@ -78,7 +83,6 @@ const ServiceFormModal = ({
     }
   };
 
-  // ✅ SỬA LẠI HÀM NÀY ĐỂ GỬI ĐÚNG DỮ LIỆU
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.tenDichVu || !formData.tenLoaiDichVu || formData.gia <= 0) {
@@ -89,27 +93,24 @@ const ServiceFormModal = ({
     const dataToSend = new FormData();
 
     if (mode === "edit") {
-      // Khi CẬP NHẬT, gửi tất cả các trường trong form
       Object.keys(formData).forEach((key) => {
         const value = formData[key] === "" ? 0 : formData[key];
         dataToSend.append(key, value);
       });
     } else {
-      // Khi THÊM MỚI, chỉ gửi các trường cần thiết
       dataToSend.append("tenDichVu", formData.tenDichVu);
       dataToSend.append("moTa", formData.moTa || "");
       dataToSend.append(
         "soLuongTon",
         formData.soLuongTon === "" ? 0 : formData.soLuongTon
       );
-      dataToSend.append("soLuongBan", 0); // Gửi giá trị mặc định theo yêu cầu API
+      dataToSend.append("soLuongBan", 0);
       dataToSend.append("gia", formData.gia === "" ? 0 : formData.gia);
       dataToSend.append(
         "thoiGianUocTinh",
         formData.thoiGianUocTinh === "" ? 1 : formData.thoiGianUocTinh
       );
       dataToSend.append("tenLoaiDichVu", formData.tenLoaiDichVu);
-      // Cố tình bỏ qua trường 'trangThai' khi thêm mới
     }
 
     if (imageFile) {
@@ -125,6 +126,33 @@ const ServiceFormModal = ({
       }
     };
   }, [imagePreview]);
+
+  // ✨ START: THAY ĐỔI TỪ ĐÂY
+  /**
+   * 3. Hàm fetch gợi ý loại dịch vụ
+   * - Gọi API tìm kiếm dịch vụ
+   * - Xử lý kết quả trả về để chỉ lấy danh sách các `tenLoaiDichVu` duy nhất
+   */
+  const fetchServiceTypeSuggestions = useCallback(async (criteria) => {
+    try {
+      const response = await serviceService.search(criteria, 0, 15);
+      const services = response?.data?.content || response?.content || [];
+
+      // Lấy ra danh sách các tên loại dịch vụ và lọc bỏ các giá trị trùng lặp
+      const uniqueServiceTypes = [
+        ...new Set(services.map((service) => service.tenLoaiDichVu)),
+      ];
+
+      // Chuyển đổi về định dạng mà AutocompleteInput mong muốn
+      return {
+        content: uniqueServiceTypes.map((type) => ({ tenLoaiDichVu: type })),
+      };
+    } catch (error) {
+      console.error("Lỗi khi tải gợi ý loại dịch vụ:", error);
+      return { content: [] }; // Trả về mảng rỗng nếu có lỗi
+    }
+  }, []);
+  // ✨ END: THAY ĐỔI TỚI ĐÂY
 
   if (!isOpen) return null;
 
@@ -156,18 +184,28 @@ const ServiceFormModal = ({
               required
             />
           </div>
+          {/* ✨ START: THAY ĐỔI TỪ ĐÂY */}
           <div>
             <label className="block mb-1 text-sm font-medium">
               Loại Dịch Vụ*
             </label>
-            <input
-              name="tenLoaiDichVu"
-              value={formData.tenLoaiDichVu}
-              onChange={handleChange}
-              className="w-full input-style"
+            {/* 4. Thay thế input cũ bằng AutocompleteInput */}
+            <AutocompleteInput
+              placeholder="Nhập để tìm loại dịch vụ..."
+              fetchSuggestions={fetchServiceTypeSuggestions}
+              searchParamKey="loaiDichVu"
+              displayFormat={(suggestion) => suggestion.tenLoaiDichVu}
+              onSelect={(selectedItem) => {
+                setFormData((prev) => ({
+                  ...prev,
+                  tenLoaiDichVu: selectedItem ? selectedItem.tenLoaiDichVu : "",
+                }));
+              }}
+              initialDisplayValue={formData.tenLoaiDichVu}
               required
             />
           </div>
+          {/* ✨ END: THAY ĐỔI TỚI ĐÂY */}
           <div>
             <label className="block mb-1 text-sm font-medium">Giá (VND)*</label>
             <input
