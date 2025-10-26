@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useToast } from "../context/ToastContext";
+import { useNavigate } from "react-router-dom"
 import { repairService } from "../services/repairService";
 import Table from "../components/common/Table";
 import SearchWithOptions from "../components/common/SearchBar";
@@ -32,6 +33,7 @@ const getStatusColor = (status) => {
 
 const RepairManagement = () => {
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const [overview, setOverview] = useState(null);
   const [repairs, setRepairs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -297,10 +299,14 @@ const overviewFields = overview
           options={sortOptions}
           onSortChange={setSortConfig}
         />
-        <button className="w-full sm:w-auto justify-center active:scale-95 shadow-sm
- flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition">
-          <Plus size={18} /> Lập phiếu mới
-        </button>
+        <button
+  onClick={() => navigate("/sales")}
+  className="w-full sm:w-auto justify-center active:scale-95 shadow-sm
+             flex items-center gap-2 px-4 py-2 bg-orange-500 text-white
+             rounded-lg font-semibold hover:bg-orange-600 transition"
+>
+  <Plus size={18} /> Lập phiếu mới
+</button>
       </div>
 
       <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md overflow-x-auto">
