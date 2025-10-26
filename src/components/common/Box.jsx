@@ -1,14 +1,24 @@
 // src/components/common/Box.jsx
 import React, { useState, useEffect } from "react";
 
-const Box = ({ title, fields, onClose, onSubmit, initialData, mode = "add" }) => {
+const Box = ({
+  title,
+  fields,
+  onClose,
+  onSubmit,
+  initialData,
+  mode = "add",
+}) => {
   const [form, setForm] = useState({});
 
-  // Cập nhật state của form khi initialData thay đổi
   useEffect(() => {
     const obj = {};
     fields.forEach((f) => {
-      obj[f.name] = initialData?.[f.name] || f.defaultValue || "";
+      // Chỉ khởi tạo giá trị cho các trường không có hàm render tùy chỉnh,
+      // vì state của chúng được quản lý bên ngoài.
+      if (!f.render) {
+        obj[f.name] = initialData?.[f.name] || f.defaultValue || "";
+      }
     });
     setForm(obj);
   }, [initialData, fields]);
@@ -20,13 +30,14 @@ const Box = ({ title, fields, onClose, onSubmit, initialData, mode = "add" }) =>
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Khi submit, chỉ gửi đi state của các trường input mà Box quản lý.
+    // Dữ liệu từ component render tùy chỉnh sẽ được gộp lại ở component cha.
     onSubmit(form);
   };
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 rounded-xl shadow-lg p-6 w-[420px] relative animate-fade-in transition-colors duration-300">
-        {/* Nút đóng */}
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition"
@@ -34,20 +45,20 @@ const Box = ({ title, fields, onClose, onSubmit, initialData, mode = "add" }) =>
           ✖
         </button>
 
-        {/* Tiêu đề */}
         <h3 className="text-xl font-bold text-orange-500 mb-4">{title}</h3>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4 text-sm">
           {fields.map((field) => (
-            <div key={field.name}>
+            <div key={field.name || field.label}>
               <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">
                 {field.label}
               </label>
 
-              {/* Chế độ xem hoặc chỉnh sửa */}
-              {mode === "view" ? (
-                <p className="w-full bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2 text-gray-800 dark:text-gray-100">
+              {/* NÂNG CẤP: Nếu field có hàm render tùy chỉnh, hãy dùng nó */}
+              {field.render ? (
+                field.render()
+              ) : mode === "view" ? (
+                <p className="w-full bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2">
                   {form[field.name] || "N/A"}
                 </p>
               ) : field.type === "select" ? (
@@ -55,7 +66,7 @@ const Box = ({ title, fields, onClose, onSubmit, initialData, mode = "add" }) =>
                   name={field.name}
                   value={form[field.name]}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-colors duration-300"
+                  className="w-full input-style"
                 >
                   {field.options.map((opt) => (
                     <option key={opt}>{opt}</option>
@@ -67,20 +78,15 @@ const Box = ({ title, fields, onClose, onSubmit, initialData, mode = "add" }) =>
                   type={field.type}
                   value={form[field.name]}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-colors duration-300"
+                  className="w-full input-style"
                 />
               )}
             </div>
           ))}
 
-          {/* Nút điều khiển */}
           <div className="flex justify-end mt-5 gap-3">
             {mode === "view" ? (
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-semibold transition"
-              >
+              <button type="button" onClick={onClose} className="btn-primary">
                 Đóng
               </button>
             ) : (
@@ -88,14 +94,11 @@ const Box = ({ title, fields, onClose, onSubmit, initialData, mode = "add" }) =>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                  className="btn-secondary"
                 >
                   Hủy
                 </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-semibold transition"
-                >
+                <button type="submit" className="btn-primary">
                   Lưu
                 </button>
               </>

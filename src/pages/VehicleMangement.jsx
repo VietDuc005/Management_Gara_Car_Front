@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useToast } from "../context/ToastContext";
 import { VehicleService } from "../services/VehicleService";
+import { customerService } from "../services/customerService";
 import Table from "../components/common/Table";
 import SearchWithOptions from "../components/common/SearchBar";
 import SortControls from "../components/common/SortControls";
@@ -9,10 +10,10 @@ import Pagination from "../components/common/Pagination";
 import Box from "../components/common/Box";
 import BoxOnView from "../components/common/BoxOnView";
 import ConfirmModal from "../components/common/ConfirmModal";
+import AutocompleteInput from "../components/common/AutocompleteInput";
 import { Plus } from "lucide-react";
 import Loading from "../components/common/Loading";
 
-// ========== Màu sắc trạng thái ==========
 const getStatusColor = (status) => {
   switch (status) {
     case "Hoạt động":
@@ -46,11 +47,13 @@ const VehicleManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("create");
   const [editingData, setEditingData] = useState(null);
-
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
 
-  // ========== Debounce search ==========
+  // State để quản lý khách hàng được chọn từ Autocomplete
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+
+  // Debounce search
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
@@ -59,7 +62,7 @@ const VehicleManagement = () => {
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  // ========== Fetch Data ==========
+  // Fetch Data
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
@@ -85,37 +88,11 @@ const VehicleManagement = () => {
         );
       }
 
-      console.log("🚗 API xe trả về:", responseData);
-
-      // Hỗ trợ mọi kiểu dữ liệu backend trả
-      if (
-        responseData?.data?.content &&
-        Array.isArray(responseData.data.content)
-      ) {
-        setVehicles(
-          responseData.data.content.map((x) => ({ ...x, id: x.maXe }))
-        );
-        setPagination((p) => ({
-          ...p,
-          totalPages: responseData.data.totalPages || 1,
-        }));
-      } else if (responseData?.content && Array.isArray(responseData.content)) {
-        setVehicles(responseData.content.map((x) => ({ ...x, id: x.maXe })));
-        setPagination((p) => ({
-          ...p,
-          totalPages: responseData.totalPages || 1,
-        }));
-      } else if (Array.isArray(responseData)) {
-        setVehicles(responseData.map((x) => ({ ...x, id: x.maXe })));
-        setPagination((p) => ({ ...p, totalPages: 1 }));
-      } else {
-        setVehicles([]);
-        setPagination((p) => ({ ...p, totalPages: 1, page: 0 }));
-      }
+      const data = responseData.data || responseData;
+      setVehicles(data.content?.map((v) => ({ ...v, id: v.maXe })) || []);
+      setPagination((p) => ({ ...p, totalPages: data.totalPages || 1 }));
     } catch (err) {
-      console.error("❌ Lỗi tải dữ liệu xe:", err);
       showToast(err.message || "Không thể tải danh sách xe.", "error");
-      setVehicles([]);
     } finally {
       setLoading(false);
     }
@@ -127,33 +104,37 @@ const VehicleManagement = () => {
     searchField,
     showToast,
   ]);
-// ======== GỌI API: TỔNG QUAN ========
+
   const fetchOverview = useCallback(async () => {
     try {
       const res = await VehicleService.getThongKeXe();
       setOverview(res.data || res);
     } catch (err) {
-      console.error("❌ Lỗi khi tải tổng quan:", err);
-    } finally {
-      setLoading(false);
+      console.error("Lỗi khi tải tổng quan:", err);
     }
   }, []);
 
   useEffect(() => {
     fetchOverview();
     fetchData();
-    
   }, [fetchOverview, fetchData]);
 
-  // ========== CRUD ==========
+  // CRUD Handlers
   const handleCreateNew = () => {
     setEditingData(null);
+    setSelectedCustomer(null);
     setModalMode("create");
     setIsModalOpen(true);
   };
 
   const handleEdit = (row) => {
     setEditingData(row);
+    setSelectedCustomer({
+      maKhachHang: row.maKhachHang,
+      tenKhach: row.tenKhachHang,
+      // API của bạn không trả về SĐT khách trong list xe, nên ta hiển thị tên là đủ
+      soDienThoai: "",
+    });
     setModalMode("edit");
     setIsModalOpen(true);
   };
@@ -177,13 +158,25 @@ const VehicleManagement = () => {
     }
   };
 
-  const handleSave = async (formData) => {
+  const handleSave = async (formDataFromBox) => {
     try {
+      if (!selectedCustomer?.maKhachHang) {
+        showToast("Vui lòng chọn một khách hàng hợp lệ.", "warning");
+        return;
+      }
+
+      // Gộp dữ liệu từ Box (các input thường) và từ Autocomplete (khách hàng đã chọn)
+      const finalData = {
+        ...formDataFromBox,
+        maKhachHang: selectedCustomer.maKhachHang,
+        tenKhachHang: selectedCustomer.tenKhach,
+      };
+
       if (modalMode === "create") {
-        await VehicleService.create(formData);
+        await VehicleService.create(finalData);
         showToast("Thêm mới xe thành công!", "success");
       } else {
-        await VehicleService.update(editingData.maXe, formData);
+        await VehicleService.update(editingData.maXe, finalData);
         showToast("Cập nhật xe thành công!", "success");
       }
       setIsModalOpen(false);
@@ -193,49 +186,70 @@ const VehicleManagement = () => {
     }
   };
 
-  // ========== FORM FIELD ==========
-  const VehicleFormFields = [
-    { name: "bienSo", label: "Biển Số", type: "text", required: true },
-    { name: "hangXe", label: "Hãng Xe", type: "text", required: true },
-    { name: "dongXe", label: "Dòng Xe", type: "text" },
-    { name: "namSanXuat", label: "Năm Sản Xuất", type: "number" },
-    { name: "mauSac", label: "Màu Sắc", type: "text" },
-    {
-      name: "tenKhachHang",
-      label: "Tên Khách Hàng",
-      type: "text",
-      required: true,
-    },
-    { name: "maKhachHang", label: "Mã Khách Hàng", type: "number" },
-  ];
+  // Hàm fetch gợi ý khách hàng
+  const fetchCustomerSuggestions = useCallback(async (criteria) => {
+    try {
+      // API customerService tìm kiếm theo `tenKhachHang`
+      const isPhoneNumber = /^\d+$/.test(criteria.tenKhachHang);
+      const searchCriteria = {
+        tenKhachHang: !isPhoneNumber ? criteria.tenKhachHang : undefined,
+        soDienThoai: isPhoneNumber ? criteria.tenKhachHang : undefined,
+      };
+      const response = await customerService.search(searchCriteria, 0, 10);
+      return response.data || response;
+    } catch (error) {
+      console.error("Lỗi tải gợi ý khách hàng:", error);
+      return { content: [] };
+    }
+  }, []);
 
-  const editVehicleFormFields = [
-    ...VehicleFormFields,
-    {
-      name: "trangThai",
-      label: "Trạng Thái",
-      type: "select",
-      options: ["Hoạt động", "Đã xóa"],
-      required: true,
-    },
-  ];
+  // Cấu hình form fields với render tùy chỉnh
+  const getFormFields = (mode) => {
+    const baseFields = [
+      {
+        label: "Tên Khách Hàng*",
+        render: () => (
+          <AutocompleteInput
+            placeholder="Nhập tên hoặc SĐT khách..."
+            fetchSuggestions={fetchCustomerSuggestions}
+            searchParamKey="tenKhachHang" // Key để Autocomplete build query
+            displayFormat={(kh) => `${kh.tenKhachHang} - ${kh.soDienThoai}`}
+            onSelect={setSelectedCustomer}
+            initialDisplayValue={editingData?.tenKhachHang || ""}
+            required
+          />
+        ),
+      },
+      { name: "bienSo", label: "Biển Số*", type: "text", required: true },
+      { name: "hangXe", label: "Hãng Xe*", type: "text", required: true },
+      { name: "dongXe", label: "Dòng Xe", type: "text" },
+      {
+        name: "namSanXuat",
+        label: "Năm Sản Xuất",
+        type: "number",
+        props: {
+          min: "2000",
+          max: new Date().getFullYear().toString(), 
+        },
+      },
+      { name: "mauSac", label: "Màu Sắc", type: "text" },
+    ];
 
-  // ========== SEARCH & SORT ==========
-  const sortOptions = [
-    { value: "maXe", label: "Sắp xếp theo Mã xe" },
-    { value: "bienSo", label: "Sắp xếp theo Biển số" },
-  ];
+    if (mode === "edit") {
+      return [
+        ...baseFields,
+        {
+          name: "trangThai",
+          label: "Trạng Thái",
+          type: "select",
+          options: ["Hoạt động", "Đã xóa"],
+          required: true,
+        },
+      ];
+    }
+    return baseFields;
+  };
 
-  const searchOptions = [
-    { value: "bienSo", label: "Tìm theo Biển Số" },
-    { value: "hangXe", label: "Tìm theo Hãng Xe" },
-    { value: "namSanXuat", label: "Tìm theo Năm Sản Xuất" },
-    { value: "mauSac", label: "Tìm theo Màu Sắc" },
-    { value: "trangThai", label: "Tìm theo Trạng Thái" },
-    { value: "tenKhachHang", label: "Tìm theo Tên Khách" },
-  ];
-
-  // ========== TABLE ==========
   const columns = [
     { key: "maXe", label: "Mã Xe" },
     { key: "bienSo", label: "Biển Số" },
@@ -243,6 +257,7 @@ const VehicleManagement = () => {
     { key: "dongXe", label: "Dòng Xe" },
     { key: "namSanXuat", label: "Năm Sản Xuất" },
     { key: "mauSac", label: "Màu Sắc" },
+    { key: "tenKhachHang", label: "Tên Khách Hàng" },
     {
       key: "trangThai",
       label: "Trạng Thái",
@@ -256,9 +271,19 @@ const VehicleManagement = () => {
         </span>
       ),
     },
-    { key: "tenKhachHang", label: "Tên Khách Hàng" },
-    { key: "maKhachHang", label: "Mã Khách Hàng" },
   ];
+
+  const searchOptions = [
+    { value: "bienSo", label: "Tìm theo Biển Số" },
+    { value: "hangXe", label: "Tìm theo Hãng Xe" },
+    { value: "tenKhachHang", label: "Tìm theo Tên Khách" },
+  ];
+
+  const sortOptions = [
+    { value: "maXe", label: "Sắp xếp theo Mã xe" },
+    { value: "bienSo", label: "Sắp xếp theo Biển số" },
+  ];
+
   const overviewFields = overview
     ? [
         {
@@ -277,49 +302,40 @@ const VehicleManagement = () => {
           bg: "bg-gradient-to-r from-sky-100 via-sky-200 to-sky-300 dark:from-sky-900/40 dark:via-sky-800/40 dark:to-sky-700/40",
           border: "border-l-4 border-sky-400",
         },
-        
       ]
     : [];
 
-    if (loading) return <Loading />;
-  // ========== UI ==========
+  if (loading) return <Loading />;
+
   return (
     <div className="space-y-6 transition-colors duration-300">
-      {/* Header */}
       <BoxOnView title="Tổng quan Xe" fields={overviewFields} />
 
-      {/* Search & Sort */}
-      <div
-        className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md flex flex-col sm:flex-row flex-wrap gap-4 justify-between items-center
- transition-colors duration-300"
-      >
+      <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md flex flex-col sm:flex-row flex-wrap gap-4 justify-between items-center">
         <div className="w-full sm:w-auto flex-1 min-w-[250px]">
           <SearchWithOptions
-            searchField={searchField}
-            searchTerm={searchTerm}
-            onSearchFieldChange={setSearchField}
-            onSearchTermChange={setSearchTerm}
-            options={searchOptions}
-            placeholder="Nhập giá trị tìm kiếm..."
+            {...{
+              searchField,
+              searchTerm,
+              onSearchFieldChange: setSearchField,
+              onSearchTermChange: setSearchTerm,
+              options: searchOptions,
+              placeholder: "Nhập giá trị tìm kiếm...",
+            }}
           />
         </div>
-
         <SortControls
-          sortConfig={sortConfig}
-          onSortChange={setSortConfig}
-          options={sortOptions}
+          {...{ sortConfig, onSortChange: setSortConfig, options: sortOptions }}
         />
         <button
           onClick={handleCreateNew}
-          className="w-full sm:w-auto justify-center active:scale-95 shadow-sm
- flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition"
+          className="w-full sm:w-auto justify-center active:scale-95 shadow-sm flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition"
         >
           <Plus size={18} /> Thêm mới
         </button>
       </div>
 
-      {/* Table */}
-      <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md transition-colors duration-300">
+      <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md">
         <Table
           columns={columns}
           data={vehicles}
@@ -332,18 +348,13 @@ const VehicleManagement = () => {
       <Pagination
         currentPage={pagination.page}
         totalPages={pagination.totalPages}
-        onPageChange={(newPage) =>
-          setPagination((prev) => ({ ...prev, page: newPage }))
-        }
+        onPageChange={(p) => setPagination((prev) => ({ ...prev, page: p }))}
       />
 
-      {/* Form Box */}
       {isModalOpen && (
         <Box
           title={modalMode === "create" ? "Thêm mới Xe" : "Cập nhật Xe"}
-          fields={
-            modalMode === "create" ? VehicleFormFields : editVehicleFormFields
-          }
+          fields={getFormFields(modalMode)}
           initialData={editingData}
           onClose={() => setIsModalOpen(false)}
           onSubmit={handleSave}
@@ -351,7 +362,6 @@ const VehicleManagement = () => {
         />
       )}
 
-      {/* Confirm Modal */}
       <ConfirmModal
         isOpen={isConfirmModalOpen}
         onClose={() => setIsConfirmModalOpen(false)}
