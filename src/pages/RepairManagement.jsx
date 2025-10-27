@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback} from "react";
+import { useNavigate } from "react-router-dom";
+
 import { useToast } from "../context/ToastContext";
 import { repairService } from "../services/repairService";
 import Table from "../components/common/Table";
@@ -35,6 +37,8 @@ const RepairManagement = () => {
   const [overview, setOverview] = useState(null);
   const [repairs, setRepairs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
 
   // States for modals
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -129,7 +133,7 @@ const RepairManagement = () => {
       const res = await statisticService.getThongKePhieu();
       setOverview(res.data || res);
     } catch (err) {
-      console.error("❌ Lỗi khi tải tổng quan:", err);
+      showToast(err.message || "Lỗi khi tải tổng quan", "error");
     } finally {
       setLoading(false);
     }
@@ -297,7 +301,9 @@ const overviewFields = overview
           options={sortOptions}
           onSortChange={setSortConfig}
         />
-        <button className="w-full sm:w-auto justify-center active:scale-95 shadow-sm
+        <button
+         onClick={() => navigate("/sales")}
+        className="w-full sm:w-auto justify-center active:scale-95 shadow-sm
  flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition">
           <Plus size={18} /> Lập phiếu mới
         </button>
