@@ -1,15 +1,9 @@
 import React from "react";
+import Loading from "./Loading";
 import { Eye, Edit, Trash2 } from "lucide-react";
 
 function Table({ columns, data, onView, onEdit, onDelete, loading = false }) {
-  if (loading)
-    return (
-      <div className="p-6 text-center text-gray-600 dark:text-gray-300">
-        <span className="spinner-border spinner-border-sm me-2"></span>
-        Đang tải dữ liệu...
-      </div>
-    );
-
+  if (loading) return <Loading />;
   return (
     <div className="table-responsive rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm bg-white dark:bg-gray-800 transition-colors duration-300">
       <table className="w-full text-sm text-gray-700 dark:text-gray-200">

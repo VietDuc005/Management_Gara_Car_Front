@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useToast } from "../../context/ToastContext";
 import { UploadCloud, X } from "lucide-react";
 import { API_BASE_URL } from "../../utils/constants";
+import Loading from "./Loading";
 // ✨ START: THAY ĐỔI TỪ ĐÂY
 import AutocompleteInput from "./AutocompleteInput"; // 1. Import component Autocomplete
 import { serviceService } from "../../services/serviceService"; // 2. Import service để gọi API
@@ -20,6 +21,7 @@ const ServiceFormModal = ({
   const [formData, setFormData] = useState({});
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [loading] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -156,6 +158,7 @@ const ServiceFormModal = ({
 
   if (!isOpen) return null;
 
+  if (loading) return <Loading />;
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg w-full max-w-md max-h-[90vh] flex flex-col animate-fade-in">

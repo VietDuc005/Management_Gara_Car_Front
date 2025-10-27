@@ -1,4 +1,5 @@
-import React from "react";
+import React, {useState} from "react";
+import Loading from "./Loading";
 import { ChevronDown, ArrowDownUp } from "lucide-react";
 
 /**
@@ -9,6 +10,7 @@ import { ChevronDown, ArrowDownUp } from "lucide-react";
  * @param {Array<object>} props.options - Các tùy chọn để sắp xếp [{ value, label }]
  */
 const SortControls = ({ sortConfig, onSortChange, options = [] }) => {
+  const [loading] = useState(false);
   const handleSortByChange = (e) => {
     onSortChange({ ...sortConfig, sortBy: e.target.value });
   };
@@ -18,6 +20,7 @@ const SortControls = ({ sortConfig, onSortChange, options = [] }) => {
     onSortChange({ ...sortConfig, sortDirection: newDirection });
   };
 
+  if (loading) return <Loading />;
   return (
     <div className="flex items-center gap-4">
       {/* Dropdown chọn trường sắp xếp */}

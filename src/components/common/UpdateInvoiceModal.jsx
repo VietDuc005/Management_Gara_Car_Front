@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Edit3 } from "lucide-react";
+import Loading from "./Loading";
 
 const UpdateInvoiceModal = ({ isOpen, onClose, onSave, currentData }) => {
   // State để theo dõi trường đang được chỉnh sửa ('trangThai' hoặc 'kieuThanhToan')
   const [editField, setEditField] = useState("trangThai");
   // State cho giá trị mới của trường đã chọn
   const [selectedValue, setSelectedValue] = useState("");
-
+const [loading] = useState(false);
   const statusOptions = ["Đã thanh toán", "Chưa thanh toán", "Đã hủy"];
   const paymentOptions = ["Thẻ", "Chuyển khoản", "Tiền mặt"];
 
@@ -28,6 +29,7 @@ const UpdateInvoiceModal = ({ isOpen, onClose, onSave, currentData }) => {
 
   if (!isOpen) return null;
 
+  if (loading) return <Loading />;
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 animate-fade-in">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md flex flex-col">

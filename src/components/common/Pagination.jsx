@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Loading from "./Loading";
 import {
   ChevronLeft,
   ChevronRight,
@@ -15,6 +16,7 @@ import {
  */
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   const [inputValue, setInputValue] = useState(currentPage + 1);
+  const[loading] = useState(false);
 
   useEffect(() => {
     setInputValue(currentPage + 1);
@@ -39,7 +41,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
       setInputValue(currentPage + 1);
     }
   };
-
+if (loading) return <Loading />;
   return (
     <div className="flex justify-center items-center gap-2 mt-6 text-gray-700 dark:text-gray-200 transition-colors duration-300">
       {/* Nút về trang đầu */}

@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState }  from "react";
+import Loading from "./Loading";
 import {
   Package,
   Layers,
@@ -20,7 +21,9 @@ const iconMap = {
 
 const BoxOnView = ({ title, fields = [] }) => {
   const navigate = useNavigate();
+  const [loading] = useState(false);
 
+  if (loading) return <Loading />;
   return (
     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md p-6 transition-colors duration-300">
       {title && (

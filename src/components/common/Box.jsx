@@ -1,5 +1,6 @@
 // src/components/common/Box.jsx
 import React, { useState, useEffect } from "react";
+import Loading from "./Loading";
 
 const Box = ({
   title,
@@ -10,6 +11,7 @@ const Box = ({
   mode = "add",
 }) => {
   const [form, setForm] = useState({});
+  const [loading] = useState(false);
 
   useEffect(() => {
     const obj = {};
@@ -30,11 +32,13 @@ const Box = ({
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
     // Khi submit, chỉ gửi đi state của các trường input mà Box quản lý.
     // Dữ liệu từ component render tùy chỉnh sẽ được gộp lại ở component cha.
     onSubmit(form);
   };
 
+  if (loading) return <Loading />;
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 rounded-xl shadow-lg p-6 w-[420px] relative animate-fade-in transition-colors duration-300">

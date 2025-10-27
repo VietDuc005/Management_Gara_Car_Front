@@ -1,5 +1,6 @@
-import React from "react";
+import React, {useState} from "react";
 import { AlertTriangle, X } from "lucide-react";
+import Loading from "./Loading";
 
 /**
  * Modal xác nhận hành động (hỗ trợ Dark Mode)
@@ -11,8 +12,9 @@ import { AlertTriangle, X } from "lucide-react";
  * @param {string} props.message - Thông điệp xác nhận
  */
 const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message }) => {
+  const [loading] = useState(false);
   if (!isOpen) return null;
-
+if (loading) return <Loading />;
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 animate-fade-in">
       <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 w-[450px] relative transition-colors duration-300">

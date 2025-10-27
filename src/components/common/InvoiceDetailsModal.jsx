@@ -1,4 +1,5 @@
-import React from "react";
+import React , {useState} from "react";
+import Loading from "./Loading";
 import {
   X,
   FileText,
@@ -10,6 +11,7 @@ import {
 import { formatDateTime, formatCurrency } from "../../utils/helpers"; // Dùng formatDateTime để hiển thị cả giờ
 
 const InvoiceDetailsModal = ({ isOpen, onClose, data }) => {
+  const[loading] = useState(false);
   if (!isOpen || !data) return null;
 
   const getStatusChipColor = (status) => {
@@ -23,6 +25,7 @@ const InvoiceDetailsModal = ({ isOpen, onClose, data }) => {
     }
   };
 
+  if (loading) return <Loading />;
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fade-in">
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
