@@ -353,7 +353,7 @@ const [currentFormData, setCurrentFormData] = useState({});
       type: "text",
       defaultValue: "",
     },
-    { name: "ngayVaoLam", label: "Ngày Vào Làm", type: "Date", defaultValue: "" },
+    // { name: "ngayVaoLam", label: "Ngày Vào Làm", type: "Date", defaultValue: "" },
   ];
 
   const editMachineFormFields = [
