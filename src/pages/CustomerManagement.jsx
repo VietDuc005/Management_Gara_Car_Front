@@ -158,9 +158,81 @@ const [overview, setOverview] = useState(null);
       setItemToDelete(null);
     }
   };
+    const formatPhoneNumberForDisplay = (phone) => {
+    if (!phone) return "";
+    // Loại bỏ khoảng trắng
+    phone = phone.replace(/\s+/g, "");
+    // Nếu bắt đầu bằng +84 hoặc 84 → chuyển thành 0
+    if (phone.startsWith("+84")) {
+      phone = "0" + phone.slice(3);
+    } else if (phone.startsWith("84")) {
+      phone = "0" + phone.slice(2);
+    }
+    return phone;
+  };
+
+    const [formErrors, setFormErrors] = useState({});
+  const [currentFormData, setCurrentFormData] = useState({});
 
   const handleSave = async (formData) => {
+    const errors = {};
+
+    // 🚧 Kiểm tra trống
+    if (!formData.tenKhachHang?.trim()) {
+      errors.tenKhachHang = "Vui lòng nhập tên khách hàng.";
+    }
+    if (!formData.soDienThoai?.trim()) {
+      errors.soDienThoai = "Vui lòng nhập số điện thoại.";
+    }
+    if (!formData.loaiKhach?.trim()) {
+      errors.loaiKhach = "Vui lòng chọn loại khách hàng.";
+    }
+
+    // 🚧 Kiểm tra định dạng số điện thoại VN
+    const phonePattern = /^(\+84|84|0)\s?(3|5|7|8|9)\d{1,2}\s?\d{3}\s?\d{3}$/;
+
+    if (formData.soDienThoai && !phonePattern.test(formData.soDienThoai)) {
+      errors.soDienThoai =
+        "Số điện thoại không hợp lệ (VD: 0901234567, +84901234567, hoặc +84 901234567).";
+    }
+
+    // 🚧 Kiểm tra email
+    if (!formData.email?.trim()) {
+      errors.email = "Vui lòng nhập email.";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      errors.email = "Email không hợp lệ.";
+    }
+
+    // 🚧 Kiểm tra địa chỉ
+    if (!formData.diaChi?.trim()) {
+      errors.diaChi = "Vui lòng nhập địa chỉ.";
+    }
+
+    // 🚨 Nếu có lỗi → hiển thị, focus vào ô đầu tiên
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      setCurrentFormData(formData);
+      showToast(Object.values(errors)[0], "error");
+
+      const firstErrorField = Object.keys(errors)[0];
+      setTimeout(() => {
+        const input =
+          document.getElementById(firstErrorField) ||
+          document.querySelector(`[name="${firstErrorField}"]`);
+        if (input) {
+          input.focus();
+          input.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 150);
+      return;
+    }
+
+    // ✅ Không có lỗi → tiếp tục submit
+    setFormErrors({});
     try {
+      // Chuẩn hóa lại số điện thoại trước khi lưu
+      formData.soDienThoai = formatPhoneNumberForDisplay(formData.soDienThoai);
+
       if (modalMode === "create") {
         await customerService.create(formData);
         showToast("Thêm mới khách hàng thành công!", "success");
@@ -168,12 +240,17 @@ const [overview, setOverview] = useState(null);
         await customerService.update(editingData.maKhachHang, formData);
         showToast("Cập nhật khách hàng thành công!", "success");
       }
+
       setIsModalOpen(false);
+      setCurrentFormData({});
       fetchData();
     } catch (err) {
-      showToast(err.message, "error");
+      showToast(err.message || "Đã xảy ra lỗi khi lưu khách hàng.", "error");
     }
   };
+
+
+  
   const overviewFields = overview
     ? [
         {
@@ -206,6 +283,7 @@ const [overview, setOverview] = useState(null);
         
       ]
     : [];
+
   const customerFormFields = [
     {
       name: "tenKhachHang",
@@ -351,10 +429,13 @@ if (loading) return <Loading />;
           fields={
             modalMode === "create" ? customerFormFields : editCustomerFormFields
           }
-          initialData={editingData}
-          onClose={() => setIsModalOpen(false)}
-          onSubmit={handleSave}
-          mode={modalMode}
+           initialData={Object.keys(currentFormData).length > 0 ? currentFormData : editingData}
+    onClose={() => {
+      setIsModalOpen(false);
+      setCurrentFormData({}); // reset khi đóng form
+    }}
+    onSubmit={handleSave}
+    mode={modalMode}
         />
       )}
 
