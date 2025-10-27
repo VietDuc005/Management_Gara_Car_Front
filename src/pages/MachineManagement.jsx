@@ -274,7 +274,7 @@ const [currentFormData, setCurrentFormData] = useState({});
         input.focus();
         input.scrollIntoView({ behavior: "smooth", block: "center" });
       }
-    }, 150);
+    }, 100);
     return;
   }
 
