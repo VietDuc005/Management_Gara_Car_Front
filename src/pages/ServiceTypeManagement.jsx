@@ -51,7 +51,7 @@ const ServiceTypeManagement = () => {
         const res = await serviceTypeService.getthongkeLoaiDichVu();
         setOverview(res.data || res);
       } catch (err) {
-        console.error("❌ Lỗi khi tải tổng quan:", err);
+        showToast(err.message || "Lỗi khi tải tổng quan", "error");
       } finally {
         setLoading(false);
       }
@@ -146,6 +146,7 @@ const ServiceTypeManagement = () => {
       const response = await serviceTypeService.delete(itemToDelete.maLoai);
       showToast(response.message || "Xóa thành công!", "success");
       fetchData();
+      fetchOverview();
     } catch (err) {
       showToast(err.message, "error");
     } finally {
@@ -174,6 +175,7 @@ const ServiceTypeManagement = () => {
       }
       setIsModalOpen(false);
       fetchData();
+      fetchOverview();
     } catch (err) {
       showToast(err.message, "error");
     }
@@ -199,7 +201,7 @@ const ServiceTypeManagement = () => {
         },
         {
           label: "Số loại dịch vụ mới ",
-          value: overview.soloaiDichVuMoiThangQua,
+          value: overview.soLoaiDichVuMoiThangQua,
           icon: "layers",
           color: "text-sky-500",
           bg: "bg-gradient-to-r from-sky-100 via-sky-200 to-sky-300 dark:from-sky-900/40 dark:via-sky-800/40 dark:to-sky-700/40",

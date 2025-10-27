@@ -171,6 +171,7 @@ const InvoiceManagement = () => {
         showToast(response.message || "Cập nhật thành công!", "success");
         setIsUpdateModalOpen(false);
         fetchData(); // Refresh danh sách
+        fetchOverview();
       } else {
         showToast("Cập nhật thất bại!", "error");
       }
