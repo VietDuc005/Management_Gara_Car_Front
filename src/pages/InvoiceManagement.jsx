@@ -127,7 +127,7 @@ const InvoiceManagement = () => {
       const res = await statisticService.getThongKeHoaDon();
       setOverview(res.data || res);
     } catch (err) {
-      console.error("❌ Lỗi khi tải tổng quan:", err);
+      showToast(err.message || "Lỗi khi tải tổng quan", "error");
     } finally {
       setLoading(false);
     }

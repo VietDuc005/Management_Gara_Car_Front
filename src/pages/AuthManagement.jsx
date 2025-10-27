@@ -94,7 +94,7 @@ const AuthManagement = () => {
       const res = await authService.getStatistics();
       setOverview(res.data || res);
     } catch (err) {
-      console.error("Overview Error:", err);
+      showToast(err.message || "Overview Error", "error");
     }
   }, []);
 
