@@ -110,9 +110,9 @@ const VehicleManagement = () => {
       const res = await VehicleService.getThongKeXe();
       setOverview(res.data || res);
     } catch (err) {
-      console.error("Lỗi khi tải tổng quan:", err);
+      showToast(err.message || "Lỗi khi tải tổng quan", "error");
     }
-  }, []);
+  }, [showToast]);
 
   useEffect(() => {
     fetchOverview();

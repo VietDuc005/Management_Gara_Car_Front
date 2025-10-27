@@ -50,7 +50,7 @@ const [topServices, setTopServices] = useState([]);
       const res = await statisticService.getOverview();
       setOverview(res.data || res);
     } catch (err) {
-      console.error("❌ Lỗi khi tải tổng quan:", err);
+      showToast(err.message || "Lỗi khi tải tổng quan", "error");
     } finally {
       setLoading(false);
     }
@@ -63,14 +63,14 @@ const [topServices, setTopServices] = useState([]);
       let res;
 
       if (activeTab === "Tuần") {
-        if (!selectedDate) return alert("Vui lòng chọn ngày (yyyy-mm-dd)");
+        if (!selectedDate) return showToast("Vui lòng chọn ngày (yyyy-mm-dd)");
         res = await statisticService.getDoanhthutuan(selectedDate);
       } else if (activeTab === "Tháng") {
         if (!selectedMonth || !selectedYear)
-          return alert("Vui lòng nhập tháng và năm!");
+          return showToast("Vui lòng nhập tháng và năm!");
         res = await statisticService.getDoanhthuthang(selectedMonth, selectedYear);
       } else if (activeTab === "Năm") {
-        if (!selectedYear) return alert("Vui lòng nhập năm!");
+        if (!selectedYear) return showToast("Vui lòng nhập năm!");
         res = await statisticService.getDoanhthunam(selectedYear);
       }
 

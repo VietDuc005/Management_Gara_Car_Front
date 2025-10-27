@@ -108,7 +108,7 @@ const MachineManagement = () => {
       const res = await machineService.getthongkeTho();
       setOverview(res.data || res);
     } catch (err) {
-      console.error("❌ Lỗi khi tải tổng quan:", err);
+      showToast(err.message || "Lỗi khi tải tổng quan", "error");
     } finally {
       setLoading(false);
     }
