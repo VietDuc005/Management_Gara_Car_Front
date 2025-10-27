@@ -1,7 +1,10 @@
-import React from "react";
+import React,{useState} from "react";
+import Loading from "./Loading";
 import { API_BASE_URL } from "../../utils/constants";
 
 const ProductCard = ({ item, onAddToCart, onViewDetails }) => {
+  const[loading] = useState(false);
+  if (loading) return <Loading />;
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow hover:shadow-lg transition-all duration-300 flex flex-col overflow-hidden">
       {/* Ảnh sản phẩm */}

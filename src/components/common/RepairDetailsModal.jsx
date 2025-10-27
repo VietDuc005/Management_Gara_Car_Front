@@ -1,15 +1,15 @@
-import React from "react";
+import React,{useState} from "react";
 import {
   X,
   FileText,
   Wrench,
-  User,
   Calendar,
   Tag,
   DollarSign,
   Car,
 } from "lucide-react";
 import { formatDate, formatCurrency } from "../../utils/helpers";
+import Loading from "./Loading";
 
 /**
  * Modal hiển thị chi tiết một Phiếu sửa chữa (hỗ trợ Dark Mode)
@@ -19,6 +19,7 @@ import { formatDate, formatCurrency } from "../../utils/helpers";
  * @param {object} props.data - Dữ liệu của phiếu sửa chữa
  */
 const RepairDetailsModal = ({ isOpen, onClose, data }) => {
+  const[loading] = useState(false);
   if (!isOpen || !data) return null;
 
   // Cập nhật màu sắc chip trạng thái cho Dark Mode
@@ -37,6 +38,7 @@ const RepairDetailsModal = ({ isOpen, onClose, data }) => {
     }
   };
 
+  if (loading) return <Loading />;
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fade-in transition-colors duration-300">
       {/* Thêm dark mode cho nền modal và shadow */}

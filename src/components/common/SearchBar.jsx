@@ -1,5 +1,6 @@
-import React from "react";
+import React, {useState} from "react";
 import { Search, ChevronDown } from "lucide-react";
+import Loading from "./Loading";
 
 /**
  * Component tìm kiếm có dropdown chọn trường + tự động hiển thị trạng thái theo module.
@@ -29,7 +30,9 @@ const SearchWithOptions = ({
   };
 
   const statusOptions = getStatusOptions();
+  const[loading] = useState(false);
 
+  if (loading) return <Loading />;
   return (
     <div className="flex items-center gap-2 w-full sm:w-auto">
       {/* Dropdown chọn trường tìm kiếm */}

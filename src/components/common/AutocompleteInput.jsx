@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import useDebounce from "../../hooks/useDebounce";
-
+import Loading from "./Loading";
 const AutocompleteInput = ({
   placeholder,
   fetchSuggestions,
@@ -85,6 +85,7 @@ const AutocompleteInput = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  if (loading) return <Loading />;
   return (
     <div className="relative w-full" ref={wrapperRef}>
       <input
