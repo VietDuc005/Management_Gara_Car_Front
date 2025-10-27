@@ -162,15 +162,18 @@ const MachineManagement = () => {
     }
   };
   const formatPhoneNumberForDisplay = (phone) => {
-  if (!phone) return "";
-  // Loại bỏ khoảng trắng
-  phone = phone.replace(/\s+/g, "");
-  // Nếu bắt đầu bằng +84 → chuyển thành 0
-  if (phone.startsWith("+84")) {
-    phone = "0" + phone.slice(3);
-  }
-  return phone;
-};
+    if (!phone) return "";
+    // Loại bỏ khoảng trắng
+    phone = phone.replace(/\s+/g, "");
+    // Nếu bắt đầu bằng +84 hoặc 84 → chuyển thành 0
+    if (phone.startsWith("+84")) {
+      phone = "0" + phone.slice(3);
+    } else if (phone.startsWith("84")) {
+      phone = "0" + phone.slice(2);
+    }
+    return phone;
+  };
+
 const [formErrors, setFormErrors] = useState({}); 
 const [currentFormData, setCurrentFormData] = useState({});
  const handleSave = async (formData) => {
@@ -187,60 +190,51 @@ const [currentFormData, setCurrentFormData] = useState({});
     errors.soDienThoai = "Vui lòng nhập số điện thoại.";
   }
 
- 
-
-
   // 🚧 Kiểm tra định dạng số điện thoại VN
-  const phonePattern = /^(0(32|33|34|35|36|37|38|39|56|57|58|59|70|71|72|73|74|75|76|77|78|79|81|82|83|84|85|88|89|90|91|92|93|94|96|97|98|99)\d{7}|\+84(32|33|34|35|36|37|38|39|56|57|58|59|70|71|72|73|74|75|76|77|78|79|81|82|83|84|85|88|89|90|91|92|93|94|96|97|98|99)\d{7})$/;
+  const phonePattern = /^(\+84|84|0)\s?(3|5|7|8|9)\d{1,2}\s?\d{3}\s?\d{3}$/;
 
-const validNumbers = [
-  "0321234567",
-  "0389876543",
-  "0961234567",
-  "0701234567",
-  "0897654321",
-  "0912345678",
-  "0812345678",
-  "0561234567",
-  "0921234567",
-  "0591234567",
-  "+84321234567",
-  "+84961234567",
-  "+84701234567",
-  "+84181234567",
-  "+84561234567"
-];
+  console.log("===== VALID NUMBERS =====");
+  const validPhoneNumbers = [
+  "0901234567",          // Không khoảng trắng
+  "090 123 4567",        // Có khoảng trắng
+  
+  "+84901234567",        // Có tiền tố +84
+  "+84 901 234 567",     // Có tiền tố +84 và khoảng trắng
+  "84 901234567",        // Có tiền tố 84
+  "84 901 234 567",      // Có tiền tố 84 và khoảng trắng
+  "0389876543",          // Đầu số 03
+  "03 898 76543",        // Có khoảng trắng
+  "+84389876543",        // Đầu số 03 với +84
+  ];
 
-const invalidNumbers = [
-  "0311234567",
-  "090123456",
-  "09012345678",
-  "0123456789",
-  "09991234",
-  "+840901234567",
-  "+8499123456",
-  "1234567890",
-  "0781234567",
-  "08512345678",
-  "abcdefghij"
-];
+  const invalidPhoneNumbers = [
+    "090123456",           // Thiếu số (9 chữ số)
+    "09012345678",         // Thừa số (11 chữ số)
+    "0901 234 567",        // Đầu số 0901 (cho phép), nhưng không sử dunbjg
+    "09991234",            // Thiếu số
+    "abcdefghij",          // Không phải số
+    "1234567890",          // Không bắt đầu bằng 0, +84, 84
+    "+8499123456",         // Thiếu số sau chuẩn hóa
+    "090 12 34567",        // Sai nhóm số (không chuẩn)
+    "+84 901 234 56",      // Thiếu số (9 chữ số sau chuẩn hóa)
+  ];
+  const testNumbers = (list, expected) => {
+    list.forEach(num => {
+      console.log(`${num} => ${phonePattern.test(num) === expected ? "✅ PASS" : "❌ FAIL"}`);
+    });
+  };
+  console.log("===== VALID NUMBERS =====");
+  testNumbers(validPhoneNumbers, true);
 
-console.log("===== VALID NUMBERS =====");
-validNumbers.forEach(num => {
-  console.log(`${num} => ${phonePattern.test(num) ? "PASS ✅" : "FAIL ❌"}`);
-});
-
-console.log("\n===== INVALID NUMBERS =====");
-invalidNumbers.forEach(num => {
-  console.log(`${num} => ${phonePattern.test(num) ? "FAIL ❌" : "PASS ✅"}`);
-});
+  console.log("\n===== INVALID NUMBERS =====");
+  testNumbers(invalidPhoneNumbers, false);
 
   if (
     formData.soDienThoai &&
     !phonePattern.test(formData.soDienThoai)
   ) {
     errors.soDienThoai =
-      "Số điện thoại không hợp lệ. Chỉ nhận số của các mạng VN (Viettel, Mobifone, Vinaphone, Vietnamobile, Gmobile). Nhập theo dạng 0xxxxxxxxx hoặc +84xxxxxxxx (vd: 0901234567, +84901234567)";
+      "Số điện thoại không hợp lệ (VD: 0901234567, +84901234567).";
   }
 
   // 🚧 Kiểm tra email
@@ -359,7 +353,7 @@ invalidNumbers.forEach(num => {
       type: "text",
       defaultValue: "",
     },
-    { name: "ngayVaoLam", label: "Ngày Vào Làm", type: "Date", defaultValue: "" },
+    // { name: "ngayVaoLam", label: "Ngày Vào Làm", type: "Date", defaultValue: "" },
   ];
 
   const editMachineFormFields = [
