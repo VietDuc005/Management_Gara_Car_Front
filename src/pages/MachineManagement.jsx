@@ -218,16 +218,16 @@ const [currentFormData, setCurrentFormData] = useState({});
     "090 12 34567",        // Sai nhóm số (không chuẩn)
     "+84 901 234 56",      // Thiếu số (9 chữ số sau chuẩn hóa)
   ];
-  const testNumbers = (list, expected) => {
-    list.forEach(num => {
-      console.log(`${num} => ${phonePattern.test(num) === expected ? "✅ PASS" : "❌ FAIL"}`);
-    });
-  };
-  console.log("===== VALID NUMBERS =====");
-  testNumbers(validPhoneNumbers, true);
+  // const testNumbers = (list, expected) => {
+  //   list.forEach(num => {
+  //     console.log(`${num} => ${phonePattern.test(num) === expected ? "✅ PASS" : "❌ FAIL"}`);
+  //   });
+  // };
+  // console.log("===== VALID NUMBERS =====");
+  // testNumbers(validPhoneNumbers, true);
 
-  console.log("\n===== INVALID NUMBERS =====");
-  testNumbers(invalidPhoneNumbers, false);
+  // console.log("\n===== INVALID NUMBERS =====");
+  // testNumbers(invalidPhoneNumbers, false);
 
   if (
     formData.soDienThoai &&
