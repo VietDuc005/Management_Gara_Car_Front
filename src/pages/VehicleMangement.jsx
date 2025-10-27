@@ -52,7 +52,9 @@ const VehicleManagement = () => {
 
   // State để quản lý khách hàng được chọn từ Autocomplete
   const [selectedCustomer, setSelectedCustomer] = useState(null);
-
+  // ======= VALIDATE + LƯU DỮ LIỆU LỖI =======
+const [formErrors, setFormErrors] = useState({});
+const [currentFormData, setCurrentFormData] = useState({});
   // Debounce search
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -110,9 +112,9 @@ const VehicleManagement = () => {
       const res = await VehicleService.getThongKeXe();
       setOverview(res.data || res);
     } catch (err) {
-      showToast(err.message || "Lỗi khi tải tổng quan", "error");
+      console.error("Lỗi khi tải tổng quan:", err);
     }
-  }, [showToast]);
+  }, []);
 
   useEffect(() => {
     fetchOverview();
@@ -150,7 +152,6 @@ const VehicleManagement = () => {
       await VehicleService.delete(itemToDelete.maXe);
       showToast("Xóa xe thành công!", "success");
       fetchData();
-      fetchOverview();
     } catch (err) {
       showToast(err.message, "error");
     } finally {
@@ -160,33 +161,84 @@ const VehicleManagement = () => {
   };
 
   const handleSave = async (formDataFromBox) => {
-    try {
-      if (!selectedCustomer?.maKhachHang) {
-        showToast("Vui lòng chọn một khách hàng hợp lệ.", "warning");
-        return;
-      }
+  const errors = {};
 
-      // Gộp dữ liệu từ Box (các input thường) và từ Autocomplete (khách hàng đã chọn)
-      const finalData = {
-        ...formDataFromBox,
-        maKhachHang: selectedCustomer.maKhachHang,
-        tenKhachHang: selectedCustomer.tenKhach,
-      };
+  // 🚧 Kiểm tra khách hàng chọn
+  if (!selectedCustomer?.maKhachHang) {
+    errors.tenKhachHang = "Vui lòng chọn một khách hàng hợp lệ.";
+  }
 
-      if (modalMode === "create") {
-        await VehicleService.create(finalData);
-        showToast("Thêm mới xe thành công!", "success");
-      } else {
-        await VehicleService.update(editingData.maXe, finalData);
-        showToast("Cập nhật xe thành công!", "success");
-      }
-      setIsModalOpen(false);
-      fetchData();
-      fetchOverview();
-    } catch (err) {
-      showToast(err.message, "error");
+  // 🚧 Kiểm tra biển số
+  if (!formDataFromBox.bienSo?.trim()) {
+    errors.bienSo = "Vui lòng nhập biển số xe.";
+  } else if (!/^[0-9A-Z\- ]{5,15}$/i.test(formDataFromBox.bienSo)) {
+    errors.bienSo = "Biển số không hợp lệ (chỉ chữ, số, dấu -).";
+  }
+
+  // 🚧 Kiểm tra hãng xe
+  if (!formDataFromBox.hangXe?.trim()) {
+    errors.hangXe = "Vui lòng nhập hãng xe.";
+  }
+  if (!formDataFromBox.dongXe?.trim()) {
+    errors.dongXe = "Vui lòng nhập dòng xe.";
+  }
+  // 🚧 Kiểm tra năm sản xuất
+  if (formDataFromBox.namSanXuat?.toString().trim()) {
+    const year = Number(formDataFromBox.namSanXuat);
+    const currentYear = new Date().getFullYear();
+    if (isNaN(year)) {
+      errors.namSanXuat = "Năm sản xuất phải là số.";
+    } else if (year < 2000 || year > currentYear) {
+      errors.namSanXuat = `Năm sản xuất phải trong khoảng 2000 - ${currentYear}.`;
     }
-  };
+  }
+  if (!formDataFromBox.mauSac?.trim()) {
+    errors.mauSac = "Vui lòng nhập màu sắc của xe.";
+  }
+  // 🚨 Nếu có lỗi → focus và giữ dữ liệu
+  if (Object.keys(errors).length > 0) {
+    setFormErrors(errors);
+    setCurrentFormData(formDataFromBox);
+    showToast(Object.values(errors)[0], "error");
+
+    const firstErrorField = Object.keys(errors)[0];
+    setTimeout(() => {
+      const input =
+        document.getElementById(firstErrorField) ||
+        document.querySelector(`[name="${firstErrorField}"]`);
+      if (input) {
+        input.focus();
+        input.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 100);
+    return;
+  }
+
+  // ✅ Không có lỗi → xử lý lưu
+  setFormErrors({});
+  try {
+    const finalData = {
+      ...formDataFromBox,
+      maKhachHang: selectedCustomer.maKhachHang,
+      tenKhachHang: selectedCustomer.tenKhachHang,
+    };
+
+    if (modalMode === "create") {
+      await VehicleService.create(finalData);
+      showToast("Thêm mới xe thành công!", "success");
+    } else {
+      await VehicleService.update(editingData.maXe, finalData);
+      showToast("Cập nhật xe thành công!", "success");
+    }
+
+    setIsModalOpen(false);
+    setCurrentFormData({});
+    fetchData();
+  } catch (err) {
+    showToast(err.message || "Có lỗi xảy ra khi lưu xe.", "error");
+  }
+};
+
 
   // Hàm fetch gợi ý khách hàng
   const fetchCustomerSuggestions = useCallback(async (criteria) => {
@@ -357,11 +409,15 @@ const VehicleManagement = () => {
         <Box
           title={modalMode === "create" ? "Thêm mới Xe" : "Cập nhật Xe"}
           fields={getFormFields(modalMode)}
-          initialData={editingData}
-          onClose={() => setIsModalOpen(false)}
+          initialData={Object.keys(currentFormData).length > 0 ? currentFormData : editingData}
           onSubmit={handleSave}
+          onClose={() => {
+            setIsModalOpen(false);
+            setCurrentFormData({});
+          }}
           mode={modalMode}
         />
+
       )}
 
       <ConfirmModal
