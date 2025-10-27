@@ -1,6 +1,4 @@
-// src/pages/AuthManagement.jsx
-
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { authService } from "../services/authService";
 import { useToast } from "../context/ToastContext";
 import Table from "../components/common/Table";
@@ -14,10 +12,9 @@ import { useAuth } from "../context/AuthContext";
 import { formatDate } from "../utils/helpers";
 import Loading from "../components/common/Loading";
 
-// Component Modal lựa chọn hành động
-const ActionMenuModal = ({ user, onClose, onEditInfo, onChangePassword }) => {
+// ✅ Giao diện lựa chọn hành động — CHỈ CÒN “Chỉnh sửa thông tin”
+const ActionMenuModal = ({ user, onClose, onEditInfo }) => {
   if (!user) return null;
-
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fade-in">
       <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 w-[360px] relative">
@@ -31,20 +28,12 @@ const ActionMenuModal = ({ user, onClose, onEditInfo, onChangePassword }) => {
           Tùy chọn cho:{" "}
           <span className="text-orange-500">{user.tenDangNhap}</span>
         </h3>
-        <div className="flex flex-col gap-3">
-          <button
-            onClick={onEditInfo}
-            className="w-full px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-600 text-white font-semibold transition"
-          >
-            Chỉnh sửa thông tin
-          </button>
-          <button
-            onClick={onChangePassword}
-            className="w-full px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-semibold transition"
-          >
-            Đổi mật khẩu
-          </button>
-        </div>
+        <button
+          onClick={onEditInfo}
+          className="w-full px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-600 text-white font-semibold transition"
+        >
+          Chỉnh sửa thông tin
+        </button>
       </div>
     </div>
   );
@@ -73,13 +62,22 @@ const AuthManagement = () => {
   });
 
   const [selected, setSelected] = useState(null);
-
-  // State quản lý các loại modal
   const [isCreateEditOpen, setIsCreateEditOpen] = useState(false);
-  const [isChangePwOpen, setIsChangePwOpen] = useState(false);
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
 
-  // Debounce Search
+  const [currentFormData, setCurrentFormData] = useState({});
+  const [formErrors, setFormErrors] = useState({});
+  const firstErrorRef = useRef(null);
+
+  // Focus vào input lỗi đầu tiên
+  useEffect(() => {
+    if (firstErrorRef.current) {
+      firstErrorRef.current.focus();
+      firstErrorRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [formErrors]);
+
+  // Debounce search
   useEffect(() => {
     const t = setTimeout(() => {
       setDebounced(searchTerm);
@@ -88,7 +86,6 @@ const AuthManagement = () => {
     return () => clearTimeout(t);
   }, [searchTerm]);
 
-  // Fetch Thống kê
   const fetchOverview = useCallback(async () => {
     try {
       const res = await authService.getStatistics();
@@ -98,126 +95,150 @@ const AuthManagement = () => {
     }
   }, []);
 
-  // Fetch dữ liệu
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       const { page, size } = pagination;
       const { sortBy, sortDirection } = sortConfig;
-
       let response;
       if (debounced.trim()) {
-        response = await authService.search(
-          { [searchField]: debounced },
-          page,
-          size
-        );
+        response = await authService.search({ [searchField]: debounced }, page, size);
       } else {
         response = await authService.getAll(page, size, sortBy, sortDirection);
       }
       const data = response.data || response;
       setAccounts(data.content || []);
       setPagination((p) => ({ ...p, totalPages: data.totalPages || 1 }));
-    } catch (err) {
+    } catch {
       showToast("Tải dữ liệu thất bại!", "error");
     } finally {
       setLoading(false);
     }
-  }, [
-    debounced,
-    searchField,
-    pagination.page,
-    pagination.size,
-    sortConfig,
-    showToast,
-  ]);
+  }, [debounced, searchField, pagination.page, pagination.size, sortConfig, showToast]);
 
   useEffect(() => {
     fetchOverview();
     fetchData();
   }, [fetchData, fetchOverview]);
 
-  // Handlers
   const handleCloseAllModals = () => {
     setSelected(null);
     setIsCreateEditOpen(false);
-    setIsChangePwOpen(false);
     setIsActionMenuOpen(false);
+    setCurrentFormData({});
+    setFormErrors({});
   };
 
+  // ✅ Validate
+  const validateForm = (form, fields) => {
+    const errors = {};
+    fields.forEach((f) => {
+      if (!form[f.name] && !f.disabled && !f.optional) {
+        errors[f.name] = `${f.label} không được để trống`;
+      }
+    });
+    return errors;
+  };
+
+  // ✅ Create
   const onCreateAccount = async (form) => {
-    try {
-      await authService.register(form);
-      showToast("Tạo tài khoản thành công!");
-      handleCloseAllModals();
-      fetchData();
-      fetchOverview();
-    } catch (err) {
-      showToast(err.message, "error");
-    }
-  };
+  // 🔹 Tạo bản sao form trước khi validate
+  const newFormData = { ...currentFormData, ...form };
+  const errors = validateForm(newFormData, createFields);
 
-  const onEditAccount = async (form) => {
-    try {
-      await authService.update(selected.maTaiKhoan, form);
-      showToast("Cập nhật tài khoản thành công!");
-      handleCloseAllModals();
-      fetchData();
-    } catch (err) {
-      showToast(err.message, "error");
-    }
-  };
+  if (Object.keys(errors).length > 0) {
+    setFormErrors(errors);
+    setCurrentFormData(newFormData);
 
-  const onAdminChangePassword = async (form) => {
-    if (form.matKhauMoi !== form.xacNhanMatKhau) {
-      showToast("Mật khẩu xác nhận không khớp!", "warning");
-      return;
-    }
-    if (!form.matKhauMoi) {
-      showToast("Mật khẩu không được để trống!", "warning");
-      return;
-    }
-    try {
-      // ✨ THAY ĐỔI Ở ĐÂY: Gọi API update và chỉ truyền trường mật khẩu ✨
-      await authService.update(selected.maTaiKhoan, {
-        matKhau: form.matKhauMoi,
-      });
+    // Focus vào input lỗi đầu tiên
+    const firstErrorField = Object.keys(errors)[0];
+    setTimeout(() => {
+      const input =
+        document.getElementById(firstErrorField) ||
+        document.querySelector(`[name="${firstErrorField}"]`);
+      if (input) input.focus();
+    }, 100);
 
-      showToast(
-        `Đã đổi mật khẩu cho tài khoản "${selected.tenDangNhap}" thành công!`,
-        "success"
-      );
-      handleCloseAllModals();
-    } catch (err) {
-      showToast(err.message, "error");
-    }
-  };
+    showToast("Vui lòng nhập đầy đủ thông tin!", "warning");
+    return;
+  }
 
-  // UI Configurations
+  try {
+    await authService.register(newFormData);
+    showToast("Tạo tài khoản thành công!", "success");
+    handleCloseAllModals();
+    fetchData();
+    fetchOverview();
+  } catch (err) {
+    setCurrentFormData(newFormData);
+    showToast(err.message, "error");
+  }
+};
+
+const onEditAccount = async (form) => {
+  const newFormData = { ...currentFormData, ...form };
+  const errors = validateForm(newFormData, editInfoFields);
+
+  if (Object.keys(errors).length > 0) {
+    setFormErrors(errors);
+    setCurrentFormData(newFormData);
+
+    const firstErrorField = Object.keys(errors)[0];
+    setTimeout(() => {
+      const input =
+        document.getElementById(firstErrorField) ||
+        document.querySelector(`[name="${firstErrorField}"]`);
+      if (input) input.focus();
+    }, 100);
+
+    showToast("Vui lòng nhập đầy đủ thông tin!", "warning");
+    return;
+  }
+
+  // 🧠 Thêm xử lý trước khi gọi API
+  if (newFormData.matKhauMoi && newFormData.matKhauMoi.trim() !== "") {
+    // Nếu người dùng nhập mật khẩu mới → ánh xạ sang "matKhau"
+    newFormData.matKhau = newFormData.matKhauMoi;
+  }
+
+  // 🧹 Xóa các field không cần gửi lên backend
+  delete newFormData.matKhauMoi;
+  delete newFormData.xacNhanMatKhau;
+
+  try {
+    await authService.update(selected.maTaiKhoan, newFormData);
+    showToast("Cập nhật tài khoản thành công!", "success");
+    handleCloseAllModals();
+    fetchData();
+  } catch (err) {
+    setCurrentFormData(newFormData);
+    showToast(err.message, "error");
+  }
+};
+
+
+  // UI Data
   const overviewFields = overview
     ? [
         {
           label: "Tổng tài khoản",
           value: overview.tongSoTaiKhoan,
-          icon: "users",
           color: "text-orange-500",
-          bg: "bg-gradient-to-r from-orange-100 via-orange-200 to-orange-300 dark:from-orange-900/40 dark:via-orange-800/40 dark:to-orange-700/40",
+          bg: "bg-gradient-to-r from-orange-100 via-orange-200 to-orange-300",
           border: "border-l-4 border-orange-400",
         },
         {
           label: "Đang hoạt động",
           value: overview.soTaiKhoanHoatDong,
-          icon: "user-check",
           color: "text-sky-500",
-          bg: "bg-gradient-to-r from-sky-100 via-sky-200 to-sky-300 dark:from-sky-900/40 dark:via-sky-800/40 dark:to-sky-700/40",
+          bg: "bg-gradient-to-r from-sky-100 via-sky-200 to-sky-300",
           border: "border-l-4 border-sky-400",
         },
         {
           label: "Nhân viên",
           value: overview.soTaiKhoanNhanVien,
-          icon: "user-cog",
           color: "text-emerald-500",
-          bg: "bg-gradient-to-r from-emerald-100 via-emerald-200 to-emerald-300 dark:from-emerald-900/40 dark:via-emerald-800/40 dark:to-emerald-700/40",
+          bg: "bg-gradient-to-r from-emerald-100 via-emerald-200 to-emerald-300",
           border: "border-l-4 border-emerald-400",
         },
       ]
@@ -258,7 +279,7 @@ const AuthManagement = () => {
     { value: "tenDangNhap", label: "Tên đăng nhập" },
   ];
 
-  // Fields configurations for modals
+  // Fields
   const createFields = [
     { name: "tenDangNhap", label: "Tên đăng nhập", type: "text" },
     { name: "matKhau", label: "Mật khẩu", type: "password" },
@@ -273,12 +294,7 @@ const AuthManagement = () => {
   ];
 
   const editInfoFields = [
-    {
-      name: "tenDangNhap",
-      label: "Tên đăng nhập",
-      type: "text",
-      disabled: true,
-    },
+    { name: "tenDangNhap", label: "Tên đăng nhập", type: "text", disabled: true },
     { name: "email", label: "Email", type: "text" },
     {
       name: "vaiTro",
@@ -292,17 +308,14 @@ const AuthManagement = () => {
       type: "select",
       options: ["Hoạt động", "Ngừng hoạt động"],
     },
-  ];
-
-  const changePasswordFields = [
-    { name: "matKhauMoi", label: "Mật khẩu mới", type: "password" },
-    { name: "xacNhanMatKhau", label: "Xác nhận mật khẩu", type: "password" },
+    { name: "matKhauMoi", label: "Mật khẩu mới", type: "password", optional: true },
+    { name: "xacNhanMatKhau", label: "Xác nhận mật khẩu", type: "password", optional: true },
   ];
 
   if (loading) return <Loading />;
 
   return (
-    <div className="space-y-6 transition-colors duration-300">
+    <div className="space-y-6">
       <BoxOnView title="Thống kê tài khoản" fields={overviewFields} />
 
       <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md flex flex-wrap items-center justify-between gap-4">
@@ -318,11 +331,7 @@ const AuthManagement = () => {
         />
         <div className="flex gap-3">
           <SortControls
-            {...{
-              sortConfig,
-              options: sortOptions,
-              onSortChange: setSortConfig,
-            }}
+            {...{ sortConfig, options: sortOptions, onSortChange: setSortConfig }}
           />
           <button
             onClick={() => {
@@ -343,7 +352,7 @@ const AuthManagement = () => {
           loading={loading}
           onEdit={(row) => {
             setSelected(row);
-            setIsActionMenuOpen(true); // Mở menu lựa chọn
+            setIsActionMenuOpen(true);
           }}
         />
       </div>
@@ -354,9 +363,7 @@ const AuthManagement = () => {
         onPageChange={(p) => setPagination((prev) => ({ ...prev, page: p }))}
       />
 
-      {/* MODALS */}
-
-      {/* Menu chọn hành động */}
+      {/* Menu chọn */}
       {isActionMenuOpen && (
         <ActionMenuModal
           user={selected}
@@ -365,35 +372,26 @@ const AuthManagement = () => {
             setIsActionMenuOpen(false);
             setIsCreateEditOpen(true);
           }}
-          onChangePassword={() => {
-            setIsActionMenuOpen(false);
-            setIsChangePwOpen(true);
-          }}
         />
       )}
 
-      {/* Modal Thêm mới / Sửa thông tin */}
+      {/* Create/Edit Modal */}
       {isCreateEditOpen && (
         <Box
           title={
             selected
-              ? `Chỉnh sửa: ${selected.tenDangNhap}`
+              ? `Cập nhật tài khoản: ${selected.tenDangNhap}`
               : "Tạo tài khoản mới"
           }
           fields={selected ? editInfoFields : createFields}
-          initialData={selected}
+          initialData={
+            Object.keys(currentFormData).length > 0
+              ? currentFormData
+              : selected
+          }
+          formErrors={formErrors}
           onClose={handleCloseAllModals}
           onSubmit={selected ? onEditAccount : onCreateAccount}
-        />
-      )}
-
-      {/* Modal Đổi mật khẩu */}
-      {isChangePwOpen && (
-        <Box
-          title={`Đổi mật khẩu cho: ${selected.tenDangNhap}`}
-          fields={changePasswordFields}
-          onClose={handleCloseAllModals}
-          onSubmit={onAdminChangePassword}
         />
       )}
     </div>
