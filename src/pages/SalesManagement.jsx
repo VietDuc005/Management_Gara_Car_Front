@@ -143,7 +143,7 @@ const SalesManagement = () => {
 
   // LOGIC LỌC DỮ LIỆU
   const filteredServices = services.filter((s) => {
-    const isAvailable = s.status === "Còn hàng";
+    const isAvailable = s.status === "Còn hàng" || s.status === "Sắp hết";
     const matchCategory =
       selectedCategory === "Tất cả" || s.category === selectedCategory;
     const matchSearch = (s.name || "")
@@ -251,7 +251,7 @@ const SalesManagement = () => {
           >
             <ChevronsLeft size={20} />
             <span className="font-semibold text-sm hidden sm:inline select-none">
-              Xem Đơn Hàng
+              Tạo đơn hàng mới
             </span>
           </button>
         )}
