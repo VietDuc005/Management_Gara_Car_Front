@@ -3,6 +3,7 @@ import React, { useState, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { Wrench, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import LoginBackground from "./LoginBackground";
 
 const Login = () => {
   const [formData, setFormData] = useState({ username: "", password: "" });
@@ -22,10 +23,8 @@ const Login = () => {
 
     try {
       await login(formData.username, formData.password);
-      // Đăng nhập thành công, chuyển về dashboard
       navigate("/dashboard");
     } catch (err) {
-      // Hiển thị lỗi từ server hoặc lỗi mặc định
       setError(err.message || "Đăng nhập thất bại. Vui lòng thử lại!");
     } finally {
       setLoading(false);
@@ -33,27 +32,34 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl p-8 border border-orange-100">
-          {/* LOGO + TITLE */}
-          <div className="flex items-center justify-center mb-8">
-            <div className="p-3 bg-orange-100 rounded-full">
+    <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden">
+      
+      {/* ✅ Background chuyên nghiệp kiểu Garage */}
+      <LoginBackground />
+
+      {/* ✅ FORM LOGIN */}
+      <div className="relative z-10 w-full max-w-md px-6">
+        <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200 p-10">
+          
+          {/* HEADER */}
+          <div className="flex items-center justify-center mb-7">
+            <div className="p-3 bg-orange-200/70 rounded-full shadow-sm">
               <Wrench className="w-7 h-7 text-orange-600" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-800 ml-3 tracking-tight">
+            <h1 className="text-2xl font-bold text-gray-900 ml-3">
               Garage Management
             </h1>
           </div>
 
-          <h2 className="text-lg font-semibold text-gray-700 mb-6 text-center">
+          <p className="text-gray-600 text-center mb-6 font-medium">
             Đăng nhập hệ thống quản lý gara
-          </h2>
+          </p>
 
           {/* FORM */}
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* USERNAME */}
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Tên đăng nhập
               </label>
               <input
@@ -62,13 +68,15 @@ const Login = () => {
                 placeholder="Nhập tên đăng nhập..."
                 value={formData.username}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-transparent outline-none transition"
+                className="w-full px-4 py-2.5 border border-gray-300 bg-gray-50 rounded-lg
+                focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition"
                 required
               />
             </div>
 
+            {/* PASSWORD */}
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Mật khẩu
               </label>
               <input
@@ -77,24 +85,26 @@ const Login = () => {
                 placeholder="Nhập mật khẩu..."
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-transparent outline-none transition"
+                className="w-full px-4 py-2.5 border border-gray-300 bg-gray-50 rounded-lg
+                focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition"
                 required
               />
             </div>
 
-            {/* THÔNG BÁO LỖI */}
+            {/* ERROR */}
             {error && (
-              <div className="p-3 bg-red-100 text-red-600 rounded-lg text-sm flex items-center gap-2">
-                <AlertCircle size={16} />
+              <div className="p-3 bg-red-100 border border-red-200 text-red-600 rounded-lg text-sm flex items-center gap-2">
+                <AlertCircle size={18} />
                 <span>{error}</span>
               </div>
             )}
 
-            {/* NÚT ĐĂNG NHẬP */}
+            {/* BUTTON */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded-lg font-semibold shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg font-semibold
+              shadow-md shadow-orange-700/20 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Đang xử lý..." : "Đăng nhập"}
             </button>
@@ -102,7 +112,7 @@ const Login = () => {
 
           {/* FOOTER */}
           <p className="text-xs text-gray-500 mt-6 text-center">
-            © 2025 Garage Management System – Powered by React & Spring Boot
+            © 2025 Garage Management System — React & Spring Boot
           </p>
         </div>
       </div>
