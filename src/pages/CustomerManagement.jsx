@@ -107,15 +107,12 @@ const [overview, setOverview] = useState(null);
        setOverview(res.data || res);
      } catch (err) {
        showToast(err.message || "Lỗi khi tải tổng quan", "error");
-     } finally {
-       setLoading(false);
+     } finally{
+      setLoading(false);
      }
-   }, []);
-   // ======== useEffect ========
-     useEffect(() => {
-       fetchOverview();
-       
-     }, [fetchOverview]);
+   }, [showToast]);
+   
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
@@ -126,7 +123,9 @@ const [overview, setOverview] = useState(null);
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+    fetchOverview();
+    
+  }, [fetchData, fetchOverview]);
 
   const handleCreateNew = () => {
     setEditingData(null);
@@ -151,6 +150,7 @@ const [overview, setOverview] = useState(null);
       await customerService.delete(itemToDelete.maKhachHang);
       showToast("Xóa khách hàng thành công!", "success");
       fetchData();
+      fetchOverview();
     } catch (err) {
       showToast(err.message, "error");
     } finally {
@@ -244,6 +244,7 @@ const [overview, setOverview] = useState(null);
       setIsModalOpen(false);
       setCurrentFormData({});
       fetchData();
+      fetchOverview();
     } catch (err) {
       showToast(err.message || "Đã xảy ra lỗi khi lưu khách hàng.", "error");
     }

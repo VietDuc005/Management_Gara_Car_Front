@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback} from "react";
 import { useNavigate } from "react-router-dom";
-
 import { useToast } from "../context/ToastContext";
 import { repairService } from "../services/repairService";
 import Table from "../components/common/Table";
@@ -168,6 +167,7 @@ const RepairManagement = () => {
       );
       setIsEditModalOpen(false);
       fetchData();
+      fetchOverview();
     } catch (err) {
       showToast(err.message, "error");
     } finally {

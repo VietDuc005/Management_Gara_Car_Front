@@ -158,6 +158,7 @@ const ServiceManagement = () => {
       }
       setIsModalOpen(false);
       fetchData();
+      fetchOverview();
     } catch (err) {
       showToast(err.message, "error");
     } finally {
@@ -177,6 +178,7 @@ const ServiceManagement = () => {
       const response = await serviceService.delete(itemToDelete.maDichVu);
       showToast(response.message || "Xóa dịch vụ thành công!", "success");
       fetchData();
+      fetchOverview();
     } catch (err) {
       showToast(err.message, "error");
     } finally {

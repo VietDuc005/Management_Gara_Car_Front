@@ -210,6 +210,7 @@ const onEditAccount = async (form) => {
     showToast("Cập nhật tài khoản thành công!", "success");
     handleCloseAllModals();
     fetchData();
+    fetchOverview();
   } catch (err) {
     setCurrentFormData(newFormData);
     showToast(err.message, "error");

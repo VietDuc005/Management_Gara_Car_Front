@@ -150,6 +150,7 @@ const VehicleManagement = () => {
       await VehicleService.delete(itemToDelete.maXe);
       showToast("Xóa xe thành công!", "success");
       fetchData();
+      fetchOverview();
     } catch (err) {
       showToast(err.message, "error");
     } finally {
@@ -181,6 +182,7 @@ const VehicleManagement = () => {
       }
       setIsModalOpen(false);
       fetchData();
+      fetchOverview();
     } catch (err) {
       showToast(err.message, "error");
     }

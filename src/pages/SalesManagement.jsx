@@ -7,10 +7,12 @@ import { Search, ClipboardList, ChevronsLeft } from "lucide-react";
 import { serviceService } from "../services/serviceService";
 import { serviceTypeService } from "../services/serviceTypeService";
 import { formatCurrency } from "../utils/helpers";
+import { useToast } from "../context/ToastContext";
 import Loading from "../components/common/Loading";
 
 const SalesManagement = () => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const { addToCart } = useCart();
   const [services, setServices] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -42,7 +44,7 @@ const SalesManagement = () => {
           setCategories(["Tất cả", ...categoryNames]);
         }
       } catch (err) {
-        console.error("❌ Lỗi tải loại dịch vụ:", err);
+        showToast(err.message || "Lỗi tải loại dịch vụ", "error");
       }
     };
     fetchCategories();
@@ -72,13 +74,14 @@ const SalesManagement = () => {
         setServices(mapped);
         setError("");
       } catch (err) {
-        console.error("❌ Lỗi tải danh sách dịch vụ:", err);
+        showToast(err.message || "Lỗi khi tải loại dịch vụ", "error");
         setError("Không thể tải danh sách dịch vụ từ server.");
       } finally {
         setLoading(false);
       }
     };
     fetchData();
+    
   }, []);
 
   // Xử lý kéo thả nút
