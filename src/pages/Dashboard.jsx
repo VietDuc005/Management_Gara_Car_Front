@@ -140,10 +140,10 @@ const fetchTopServices = useCallback(async () => {
 }, [fetchOverview, fetchUsageRate, fetchTopServices]);
 
 
-  // // Mặc định hiển thị doanh thu năm hiện tại khi mở Dashboard
-  // useEffect(() => {
-  //   fetchRevenue();
-  // }, [fetchRevenue]);
+ // ✅ Load doanh thu năm ngay khi vào Dashboard
+useEffect(() => {
+  if (activeTab === "Năm") fetchRevenue();
+}, [fetchRevenue, activeTab]);
 
   // ======== BOX TỔNG QUAN ========
   const overviewFields = overview
